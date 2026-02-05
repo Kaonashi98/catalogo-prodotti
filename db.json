@@ -3,25 +3,25 @@
     {
       "id": "1",
       "nome": "Galaxy S22 Ultra",
-      "prezzo": 100,
+      "prezzo": 899,
       "disponibile": false
     },
     {
       "id": "2",
       "nome": "iPhone 14 Pro",
-      "prezzo": 200,
+      "prezzo": 799,
       "disponibile": false
     },
     {
       "id": "3",
       "nome": "Pixel 6",
-      "prezzo": 150,
+      "prezzo": 689,
       "disponibile": true
     },
     {
       "id": "4",
       "nome": "OnePlus 10 Pro",
-      "prezzo": 120,
+      "prezzo": 899,
       "disponibile": true
     },
     {
@@ -58,7 +58,7 @@
       "id": "10",
       "nome": "HTC U12+",
       "prezzo": 95,
-      "disponibile": true
+      "disponibile": false
     },
     {
       "id": "acde",
@@ -70,6 +70,18 @@
       "id": "2968",
       "nome": "Galaxy S25 Ultra",
       "prezzo": 1699,
+      "disponibile": true
+    },
+    {
+      "id": "f022",
+      "nome": "Google Pixel 10 Pro XL",
+      "prezzo": 1689,
+      "disponibile": true
+    },
+    {
+      "id": "2269",
+      "nome": "iPhone 15",
+      "prezzo": 1239,
       "disponibile": true
     }
   ]

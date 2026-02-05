@@ -127,20 +127,30 @@ export class AppComponent implements OnInit {
       return;
     }
 
+    // Aggiornamento ottimista: chiudi la modal subito
+    const editingIdBackup = this.editingId;
+    this.editingId = null;
+    this.cdr.detectChanges();
+
     const payload = {
       nome: this.editNome.trim(),
       prezzo: this.editPrezzo,
       disponibile: this.editDisponibile
     };
 
-    this.http.patch('http://localhost:3000/prodotti/' + this.editingId, payload)
+    this.http.patch('http://localhost:3000/prodotti/' + editingIdBackup, payload)
       .subscribe({
         next: () => {
-          console.log('Prodotto aggiornato ID:', this.editingId);
+          console.log('Prodotto aggiornato ID:', editingIdBackup);
           this.annullaModifica();
           this.caricaDati();
         },
-        error: (err) => console.error('Errore aggiornamento:', err)
+        error: (err) => {
+          console.error('Errore aggiornamento:', err);
+          this.editingId = editingIdBackup;
+          this.cdr.detectChanges();
+          alert('Errore aggiornamento prodotto');
+        }
       });
   }
 
