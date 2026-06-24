@@ -1,44 +1,57 @@
 <div class="page">
   <header class="header">
     <div class="brand">
-      <span class="brand__mark" aria-hidden="true"></span>
+      <span class="brand__mark" aria-hidden="true">CP</span>
       <div class="brand__text">
-        <h1 class="brand__title">Gestione Catalogo smartphone</h1>
-        <!-- <p class="brand__subtitle">Prodotti (CRUD)</p> -->
+        <p class="brand__eyebrow">Angular CRUD portfolio</p>
+        <h1 class="brand__title">Catalogo prodotti smartphone</h1>
+        <p class="brand__subtitle">Gestisci prodotti, prezzi e disponibilita con un backend mock in JSON Server.</p>
       </div>
     </div>
   </header>
 
-  <section class="panel">
-    <h2 class="panel__title">Aggiungi nuovo prodotto</h2>
+  @if (errorMessage) {
+    <div class="notice notice--error" role="alert">{{ errorMessage }}</div>
+  }
+
+  @if (successMessage) {
+    <div class="notice notice--success" role="status">{{ successMessage }}</div>
+  }
+
+  <section class="panel" aria-labelledby="add-product-title">
+    <h2 id="add-product-title" class="panel__title">Nuovo prodotto</h2>
 
     <div class="form">
       <label class="field">
         <span class="field__label">Nome</span>
-        <input class="field__control" type="text" [(ngModel)]="nuovoNome" placeholder="Es. iPhone 15">
+        <input class="field__control" type="text" [(ngModel)]="nuovoNome" placeholder="Es. iPhone 15" autocomplete="off">
       </label>
 
       <label class="field field--price">
         <span class="field__label">Prezzo</span>
-        <input class="field__control" type="number" [(ngModel)]="nuovoPrezzo" placeholder="0" min="0">
+        <input class="field__control" type="number" [(ngModel)]="nuovoPrezzo" placeholder="0" min="1">
       </label>
 
-      <button class="btn btn--primary" type="button" (click)="aggiungiProdotto()">
-        Aggiungi
+      <button class="btn btn--primary" type="button" (click)="aggiungiProdotto()" [disabled]="isSaving">
+        {{ isSaving ? 'Salvataggio...' : 'Aggiungi' }}
       </button>
     </div>
   </section>
 
-  <section class="catalog">
+  <section class="catalog" aria-labelledby="product-list-title">
     <div class="catalog__head">
-      <h2 class="catalog__title">Prodotti</h2>
+      <h2 id="product-list-title" class="catalog__title">Prodotti</h2>
       <div class="catalog__meta">{{ prodotti.length }} totali</div>
     </div>
 
-    @if (prodotti.length === 0) {
+    @if (isLoading) {
+      <div class="empty">
+        <p class="empty__title">Caricamento prodotti...</p>
+      </div>
+    } @else if (prodotti.length === 0) {
       <div class="empty">
         <p class="empty__title">Nessun prodotto trovato.</p>
-        <p class="empty__hint">Avvia JSON Server e prova ad aggiungere un prodotto.</p>
+        <p class="empty__hint">Avvia JSON Server e aggiungi il primo prodotto.</p>
       </div>
     } @else {
       <div class="grid">
@@ -46,7 +59,7 @@
           <article class="card">
             @if (editingId === prodotto.id) {
               <div class="card__head">
-                <h3 class="card__title">Modifica</h3>
+                <h3 class="card__title">Modifica prodotto</h3>
                 <span class="pill pill--editing">ID {{ prodotto.id }}</span>
               </div>
 
@@ -58,7 +71,7 @@
 
                 <label class="field field--price">
                   <span class="field__label">Prezzo</span>
-                  <input class="field__control" type="number" [(ngModel)]="editPrezzo" placeholder="0" min="0">
+                  <input class="field__control" type="number" [(ngModel)]="editPrezzo" placeholder="0" min="1">
                 </label>
 
                 <label class="check">
@@ -68,7 +81,7 @@
               </div>
 
               <div class="card__actions card__actions--edit">
-                <button class="btn btn--primary" type="button" (click)="salvaModifica()">Salva</button>
+                <button class="btn btn--primary" type="button" (click)="salvaModifica()" [disabled]="isSaving">Salva</button>
                 <button class="btn btn--ghost" type="button" (click)="annullaModifica()">Annulla</button>
               </div>
             } @else {
@@ -87,7 +100,9 @@
               </div>
 
               <div class="card__actions">
-                <button class="btn btn--info" type="button" (click)="toggleDisponibile(prodotto)">D/E</button>
+                <button class="btn btn--info" type="button" (click)="toggleDisponibile(prodotto)">
+                  {{ prodotto.disponibile ? 'Segna esaurito' : 'Rendi disponibile' }}
+                </button>
                 <button class="btn btn--warn" type="button" (click)="iniziaModifica(prodotto)">Modifica</button>
                 <button class="btn btn--danger" type="button" (click)="eliminaProdotto(prodotto.id)">Elimina</button>
               </div>
@@ -98,4 +113,3 @@
     }
   </section>
 </div>
-

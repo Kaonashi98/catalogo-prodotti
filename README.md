@@ -1,61 +1,67 @@
-git remote add origin https://github.com/Kaonashi98/catalogo-prodotti.git
+# Catalogo Prodotti
 
-# CatalogoProdotti
+Applicazione Angular per gestire un piccolo catalogo di smartphone. Il progetto mostra un flusso CRUD completo con form, validazione essenziale, aggiornamento dello stato di disponibilita e integrazione con un backend mock basato su JSON Server.
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.2.
+## Funzionalita
 
-## Development server
+- Visualizzazione dei prodotti con prezzo e stato di disponibilita
+- Aggiunta di nuovi prodotti
+- Modifica di nome, prezzo e disponibilita
+- Eliminazione con conferma
+- Aggiornamento rapido dello stato disponibile/esaurito
+- Messaggi di errore e successo direttamente nella pagina
+- Dati serviti da `db.json` tramite JSON Server
 
-To start a local development server, run:
+## Stack
 
-```bash
-ng serve
-```
+- Angular 21
+- TypeScript
+- Angular Forms
+- HttpClient
+- JSON Server
+- SCSS
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Avvio locale
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+Installa le dipendenze:
 
 ```bash
-ng build
+npm install
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+Avvia il backend mock:
 
 ```bash
-ng test
+npm run json-server
 ```
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
+In un secondo terminale avvia Angular:
 
 ```bash
-ng e2e
+npm start
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Apri il browser su:
 
-## Additional Resources
+```text
+http://localhost:4200
+```
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+JSON Server espone i dati su:
+
+```text
+http://localhost:3000/prodotti
+```
+
+## Script disponibili
+
+```bash
+npm start
+npm run build
+npm test
+npm run json-server
+```
+
+## Obiettivo del progetto
+
+Questo progetto e pensato come esercizio portfolio: dimostra gestione dello stato lato componente, comunicazione HTTP, operazioni CRUD, form controllati e una UI responsive pronta per un piccolo gestionale.
