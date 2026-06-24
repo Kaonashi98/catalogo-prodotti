@@ -29,6 +29,7 @@ export class AppComponent implements OnInit {
   nuovoPrezzo: number | null = null;
 
   editingId: string | null = null;
+  pendingDeleteId: string | null = null;
   editNome = '';
   editPrezzo: number | null = null;
   editDisponibile = true;
@@ -37,6 +38,14 @@ export class AppComponent implements OnInit {
   isSaving = false;
   errorMessage = '';
   successMessage = '';
+
+  get prodottiDisponibili(): number {
+    return this.prodotti.filter((prodotto) => prodotto.disponibile).length;
+  }
+
+  get prodottiEsauriti(): number {
+    return this.prodotti.length - this.prodottiDisponibili;
+  }
 
   ngOnInit(): void {
     this.caricaDati();
@@ -90,11 +99,22 @@ export class AppComponent implements OnInit {
     });
   }
 
+  richiediEliminazione(id: string): void {
+    this.pendingDeleteId = id;
+    this.errorMessage = '';
+    this.successMessage = '';
+  }
+
+  annullaEliminazione(): void {
+    this.pendingDeleteId = null;
+  }
+
   eliminaProdotto(id: string): void {
-    if (!id || !confirm('Vuoi eliminare questo prodotto?')) return;
+    if (!id) return;
 
     this.http.delete(`${this.apiUrl}/${id}`).subscribe({
       next: () => {
+        this.pendingDeleteId = null;
         this.mostraSuccesso('Prodotto eliminato.');
         this.caricaDati();
       },
@@ -104,6 +124,7 @@ export class AppComponent implements OnInit {
 
   iniziaModifica(prodotto: Prodotto): void {
     this.editingId = prodotto.id;
+    this.pendingDeleteId = null;
     this.editNome = prodotto.nome;
     this.editPrezzo = prodotto.prezzo;
     this.editDisponibile = prodotto.disponibile;

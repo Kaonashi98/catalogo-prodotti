@@ -2,10 +2,25 @@
   <header class="header">
     <div class="brand">
       <span class="brand__mark" aria-hidden="true">CP</span>
-      <div class="brand__text">
+      <div>
         <p class="brand__eyebrow">Angular CRUD portfolio</p>
-        <h1 class="brand__title">Catalogo prodotti smartphone</h1>
-        <p class="brand__subtitle">Gestisci prodotti, prezzi e disponibilita con un backend mock in JSON Server.</p>
+        <h1 class="brand__title">Catalogo prodotti</h1>
+        <p class="brand__subtitle">Dashboard per gestire prezzi, disponibilita e inventario smartphone.</p>
+      </div>
+    </div>
+
+    <div class="stats" aria-label="Statistiche catalogo">
+      <div class="stat">
+        <span class="stat__value">{{ prodotti.length }}</span>
+        <span class="stat__label">prodotti</span>
+      </div>
+      <div class="stat stat--ok">
+        <span class="stat__value">{{ prodottiDisponibili }}</span>
+        <span class="stat__label">disponibili</span>
+      </div>
+      <div class="stat stat--out">
+        <span class="stat__value">{{ prodottiEsauriti }}</span>
+        <span class="stat__label">esauriti</span>
       </div>
     </div>
   </header>
@@ -18,98 +33,120 @@
     <div class="notice notice--success" role="status">{{ successMessage }}</div>
   }
 
-  <section class="panel" aria-labelledby="add-product-title">
-    <h2 id="add-product-title" class="panel__title">Nuovo prodotto</h2>
+  <main class="workspace">
+    <section class="panel add-panel" aria-labelledby="add-product-title">
+      <p class="section-kicker">Nuovo articolo</p>
+      <h2 id="add-product-title" class="panel__title">Aggiungi prodotto</h2>
 
-    <div class="form">
-      <label class="field">
-        <span class="field__label">Nome</span>
-        <input class="field__control" type="text" [(ngModel)]="nuovoNome" placeholder="Es. iPhone 15" autocomplete="off">
-      </label>
+      <div class="form">
+        <label class="field">
+          <span class="field__label">Nome modello</span>
+          <input class="field__control" type="text" [(ngModel)]="nuovoNome" placeholder="Es. iPhone 15" autocomplete="off">
+        </label>
 
-      <label class="field field--price">
-        <span class="field__label">Prezzo</span>
-        <input class="field__control" type="number" [(ngModel)]="nuovoPrezzo" placeholder="0" min="1">
-      </label>
+        <label class="field">
+          <span class="field__label">Prezzo</span>
+          <input class="field__control" type="number" [(ngModel)]="nuovoPrezzo" placeholder="0" min="1">
+        </label>
 
-      <button class="btn btn--primary" type="button" (click)="aggiungiProdotto()" [disabled]="isSaving">
-        {{ isSaving ? 'Salvataggio...' : 'Aggiungi' }}
-      </button>
-    </div>
-  </section>
-
-  <section class="catalog" aria-labelledby="product-list-title">
-    <div class="catalog__head">
-      <h2 id="product-list-title" class="catalog__title">Prodotti</h2>
-      <div class="catalog__meta">{{ prodotti.length }} totali</div>
-    </div>
-
-    @if (isLoading) {
-      <div class="empty">
-        <p class="empty__title">Caricamento prodotti...</p>
+        <button class="btn btn--primary btn--wide" type="button" (click)="aggiungiProdotto()" [disabled]="isSaving">
+          {{ isSaving ? 'Salvataggio...' : 'Aggiungi al catalogo' }}
+        </button>
       </div>
-    } @else if (prodotti.length === 0) {
-      <div class="empty">
-        <p class="empty__title">Nessun prodotto trovato.</p>
-        <p class="empty__hint">Avvia JSON Server e aggiungi il primo prodotto.</p>
+    </section>
+
+    <section class="catalog-panel" aria-labelledby="product-list-title">
+      <div class="catalog__head">
+        <div>
+          <p class="section-kicker">Inventario</p>
+          <h2 id="product-list-title" class="catalog__title">Prodotti in catalogo</h2>
+        </div>
+        <button class="btn btn--ghost" type="button" (click)="caricaDati()">Aggiorna</button>
       </div>
-    } @else {
-      <div class="grid">
-        @for (prodotto of prodotti; track prodotto.id) {
-          <article class="card">
-            @if (editingId === prodotto.id) {
-              <div class="card__head">
-                <h3 class="card__title">Modifica prodotto</h3>
-                <span class="pill pill--editing">ID {{ prodotto.id }}</span>
-              </div>
 
-              <div class="card__body">
-                <label class="field">
-                  <span class="field__label">Nome</span>
-                  <input class="field__control" type="text" [(ngModel)]="editNome" placeholder="Nome modello">
-                </label>
-
-                <label class="field field--price">
-                  <span class="field__label">Prezzo</span>
-                  <input class="field__control" type="number" [(ngModel)]="editPrezzo" placeholder="0" min="1">
-                </label>
-
-                <label class="check">
-                  <input class="check__box" type="checkbox" [(ngModel)]="editDisponibile">
-                  <span class="check__label">Disponibile</span>
-                </label>
-              </div>
-
-              <div class="card__actions card__actions--edit">
-                <button class="btn btn--primary" type="button" (click)="salvaModifica()" [disabled]="isSaving">Salva</button>
-                <button class="btn btn--ghost" type="button" (click)="annullaModifica()">Annulla</button>
-              </div>
-            } @else {
-              <div class="card__head">
-                <h3 class="card__title">{{ prodotto.nome }}</h3>
-                <span class="pill" [class.pill--ok]="prodotto.disponibile" [class.pill--out]="!prodotto.disponibile">
-                  {{ prodotto.disponibile ? 'Disponibile' : 'Esaurito' }}
-                </span>
-              </div>
-
-              <div class="card__body">
-                <div class="price">
-                  <span class="price__label">Prezzo</span>
-                  <span class="price__value">{{ prodotto.prezzo | currency:'EUR' }}</span>
+      @if (isLoading) {
+        <div class="empty">
+          <p class="empty__title">Caricamento prodotti...</p>
+        </div>
+      } @else if (prodotti.length === 0) {
+        <div class="empty">
+          <p class="empty__title">Nessun prodotto trovato.</p>
+          <p class="empty__hint">Avvia JSON Server e aggiungi il primo prodotto.</p>
+        </div>
+      } @else {
+        <div class="grid">
+          @for (prodotto of prodotti; track prodotto.id) {
+            <article class="card">
+              @if (editingId === prodotto.id) {
+                <div class="card__top">
+                  <div>
+                    <p class="card__meta">ID {{ prodotto.id }}</p>
+                    <h3 class="card__title">Modifica prodotto</h3>
+                  </div>
+                  <span class="pill pill--editing">In modifica</span>
                 </div>
-              </div>
 
-              <div class="card__actions">
-                <button class="btn btn--info" type="button" (click)="toggleDisponibile(prodotto)">
-                  {{ prodotto.disponibile ? 'Segna esaurito' : 'Rendi disponibile' }}
-                </button>
-                <button class="btn btn--warn" type="button" (click)="iniziaModifica(prodotto)">Modifica</button>
-                <button class="btn btn--danger" type="button" (click)="eliminaProdotto(prodotto.id)">Elimina</button>
-              </div>
-            }
-          </article>
-        }
-      </div>
-    }
-  </section>
+                <div class="edit-form">
+                  <label class="field">
+                    <span class="field__label">Nome modello</span>
+                    <input class="field__control" type="text" [(ngModel)]="editNome" placeholder="Nome modello">
+                  </label>
+
+                  <label class="field">
+                    <span class="field__label">Prezzo</span>
+                    <input class="field__control" type="number" [(ngModel)]="editPrezzo" placeholder="0" min="1">
+                  </label>
+
+                  <label class="check">
+                    <input class="check__box" type="checkbox" [(ngModel)]="editDisponibile">
+                    <span>Disponibile</span>
+                  </label>
+                </div>
+
+                <div class="card__actions card__actions--edit">
+                  <button class="btn btn--primary" type="button" (click)="salvaModifica()" [disabled]="isSaving">Salva</button>
+                  <button class="btn btn--ghost" type="button" (click)="annullaModifica()">Annulla</button>
+                </div>
+              } @else {
+                <div class="card__top">
+                  <div class="device" aria-hidden="true">
+                    <span>{{ prodotto.nome.slice(0, 2).toUpperCase() }}</span>
+                  </div>
+                  <span class="pill" [class.pill--ok]="prodotto.disponibile" [class.pill--out]="!prodotto.disponibile">
+                    {{ prodotto.disponibile ? 'Disponibile' : 'Esaurito' }}
+                  </span>
+                </div>
+
+                <h3 class="card__title">{{ prodotto.nome }}</h3>
+                <p class="card__meta">Codice prodotto {{ prodotto.id }}</p>
+
+                <div class="price-row">
+                  <span>Prezzo</span>
+                  <strong>{{ prodotto.prezzo | currency:'EUR' }}</strong>
+                </div>
+
+                @if (pendingDeleteId === prodotto.id) {
+                  <div class="confirm-box" role="alert">
+                    <span>Confermi eliminazione?</span>
+                    <div class="confirm-box__actions">
+                      <button class="btn btn--danger" type="button" (click)="eliminaProdotto(prodotto.id)">Elimina</button>
+                      <button class="btn btn--ghost" type="button" (click)="annullaEliminazione()">Annulla</button>
+                    </div>
+                  </div>
+                } @else {
+                  <div class="card__actions">
+                    <button class="btn btn--state" type="button" (click)="toggleDisponibile(prodotto)">
+                      {{ prodotto.disponibile ? 'Segna esaurito' : 'Rendi disponibile' }}
+                    </button>
+                    <button class="btn btn--edit" type="button" (click)="iniziaModifica(prodotto)">Modifica</button>
+                    <button class="btn btn--danger" type="button" (click)="richiediEliminazione(prodotto.id)">Elimina</button>
+                  </div>
+                }
+              }
+            </article>
+          }
+        </div>
+      }
+    </section>
+  </main>
 </div>

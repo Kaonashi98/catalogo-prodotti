@@ -32,6 +32,6 @@ describe('AppComponent', () => {
     request.flush([]);
 
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Catalogo prodotti smartphone');
+    expect(compiled.querySelector('h1')?.textContent).toContain('Catalogo prodotti');
   });
 });
