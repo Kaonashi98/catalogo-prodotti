@@ -2,6 +2,8 @@
 
 Applicazione Angular per gestire un catalogo di smartphone con operazioni CRUD complete. Il progetto mostra form controllati, validazione essenziale, gestione dell'inventario e integrazione con un backend online basato su Supabase.
 
+Demo online: [catalogo-prodotti.vercel.app](https://catalogo-prodotti.vercel.app/)
+
 ## Funzionalità
 
 - Visualizzazione dei prodotti con prezzo, immagine, quantità e stato di disponibilità.
