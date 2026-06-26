@@ -1,16 +1,17 @@
 # Catalogo Prodotti
 
-Applicazione Angular per gestire un piccolo catalogo di smartphone. Il progetto mostra un flusso CRUD completo con form, validazione essenziale, aggiornamento dello stato di disponibilita e integrazione con un backend mock basato su JSON Server.
+Applicazione Angular per gestire un piccolo catalogo di smartphone. Il progetto mostra un flusso CRUD completo con form, validazione essenziale, gestione dell'inventario e integrazione con un backend mock basato su JSON Server.
 
-## Funzionalita
+## Funzionalità
 
-- Visualizzazione dei prodotti con prezzo e stato di disponibilita
-- Aggiunta di nuovi prodotti
-- Modifica di nome, prezzo e disponibilita
-- Eliminazione con conferma
-- Aggiornamento rapido dello stato disponibile/esaurito
-- Messaggi di errore e successo direttamente nella pagina
-- Dati serviti da `db.json` tramite JSON Server
+- Visualizzazione dei prodotti con prezzo, immagine, quantità e stato di disponibilità.
+- Aggiunta di nuovi prodotti tramite form controllato.
+- Modifica di nome, prezzo, quantità e disponibilità.
+- Eliminazione con richiesta di conferma.
+- Aggiornamento rapido dello stato disponibile/esaurito.
+- Incremento e decremento delle quantità disponibili.
+- Messaggi di errore e successo direttamente nella pagina.
+- Dati serviti da `db.json` tramite JSON Server.
 
 ## Stack
 
@@ -53,6 +54,10 @@ JSON Server espone i dati su:
 http://localhost:3000/prodotti
 ```
 
+## Persistenza dei dati
+
+Le modifiche fatte dall'interfaccia vengono salvate in `db.json` mentre JSON Server è in esecuzione. Questo rende il progetto utile per simulare un piccolo backend REST locale, senza dover configurare un database reale.
+
 ## Script disponibili
 
 ```bash
@@ -64,4 +69,4 @@ npm run json-server
 
 ## Obiettivo del progetto
 
-Questo progetto e pensato come esercizio portfolio: dimostra gestione dello stato lato componente, comunicazione HTTP, operazioni CRUD, form controllati e una UI responsive pronta per un piccolo gestionale.
+Questo progetto è pensato come esercizio portfolio: dimostra gestione dello stato lato componente, comunicazione HTTP, operazioni CRUD, form controllati, aggiornamenti ottimistici e una UI responsive pronta per un piccolo gestionale.

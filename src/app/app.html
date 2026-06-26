@@ -1,12 +1,8 @@
 <div class="page">
   <header class="header">
     <div class="brand">
-      <span class="brand__mark" aria-hidden="true">CP</span>
-      <div>
-        <p class="brand__eyebrow">Angular CRUD portfolio</p>
-        <h1 class="brand__title">Catalogo prodotti</h1>
-        <p class="brand__subtitle">Dashboard per gestire prezzi, disponibilita e inventario smartphone.</p>
-      </div>
+      <h1 class="brand__title">Catalogo prodotti</h1>
+      <p class="brand__subtitle">Dashboard per gestire prezzi, disponibilità e inventario smartphone.</p>
     </div>
 
     <div class="stats" aria-label="Statistiche catalogo">
@@ -17,6 +13,10 @@
       <div class="stat stat--ok">
         <span class="stat__value">{{ prodottiDisponibili }}</span>
         <span class="stat__label">disponibili</span>
+      </div>
+      <div class="stat stat--stock">
+        <span class="stat__value">{{ pezziTotali }}</span>
+        <span class="stat__label">pezzi</span>
       </div>
       <div class="stat stat--out">
         <span class="stat__value">{{ prodottiEsauriti }}</span>
@@ -30,7 +30,9 @@
   }
 
   @if (successMessage) {
-    <div class="notice notice--success" role="status">{{ successMessage }}</div>
+    <div class="notice notice--success" [class.notice--fade]="isSuccessFading" role="status">
+      {{ successMessage }}
+    </div>
   }
 
   <main class="workspace">
@@ -47,6 +49,11 @@
         <label class="field">
           <span class="field__label">Prezzo</span>
           <input class="field__control" type="number" [(ngModel)]="nuovoPrezzo" placeholder="0" min="1">
+        </label>
+
+        <label class="field">
+          <span class="field__label">Quantità iniziale</span>
+          <input class="field__control" type="number" [(ngModel)]="nuovaQuantita" placeholder="1" min="0">
         </label>
 
         <button class="btn btn--primary btn--wide" type="button" (click)="aggiungiProdotto()" [disabled]="isSaving">
@@ -97,6 +104,11 @@
                     <input class="field__control" type="number" [(ngModel)]="editPrezzo" placeholder="0" min="1">
                   </label>
 
+                  <label class="field">
+                    <span class="field__label">Quantità</span>
+                    <input class="field__control" type="number" [(ngModel)]="editQuantita" placeholder="0" min="0">
+                  </label>
+
                   <label class="check">
                     <input class="check__box" type="checkbox" [(ngModel)]="editDisponibile">
                     <span>Disponibile</span>
@@ -109,9 +121,9 @@
                 </div>
               } @else {
                 <div class="card__top">
-                  <div class="device" aria-hidden="true">
-                    <span>{{ prodotto.nome.slice(0, 2).toUpperCase() }}</span>
-                  </div>
+                  <figure class="product-media">
+                    <img [src]="prodotto.immagine" [alt]="prodotto.nome" loading="lazy" (error)="usaImmagineFallback(prodotto)">
+                  </figure>
                   <span class="pill" [class.pill--ok]="prodotto.disponibile" [class.pill--out]="!prodotto.disponibile">
                     {{ prodotto.disponibile ? 'Disponibile' : 'Esaurito' }}
                   </span>
@@ -125,9 +137,25 @@
                   <strong>{{ prodotto.prezzo | currency:'EUR' }}</strong>
                 </div>
 
+                <div class="stock-control" aria-label="Quantità disponibile">
+                  <span class="stock-control__label">Quantità</span>
+                  <div class="stepper">
+                    <button class="stepper__btn" type="button" (click)="diminuisciQuantita(prodotto)" aria-label="Diminuisci quantità">−</button>
+                    <input
+                      class="stepper__input"
+                      type="number"
+                      min="0"
+                      [ngModel]="prodotto.quantita"
+                      (ngModelChange)="aggiornaQuantita(prodotto, $event)"
+                      aria-label="Quantità prodotto"
+                    >
+                    <button class="stepper__btn" type="button" (click)="aumentaQuantita(prodotto)" aria-label="Aumenta quantità">+</button>
+                  </div>
+                </div>
+
                 @if (pendingDeleteId === prodotto.id) {
                   <div class="confirm-box" role="alert">
-                    <span>Confermi eliminazione?</span>
+                    <span>Confermi l'eliminazione?</span>
                     <div class="confirm-box__actions">
                       <button class="btn btn--danger" type="button" (click)="eliminaProdotto(prodotto.id)">Elimina</button>
                       <button class="btn btn--ghost" type="button" (click)="annullaEliminazione()">Annulla</button>
