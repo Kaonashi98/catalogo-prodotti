@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 
 type Prodotto = {
@@ -13,7 +13,10 @@ type Prodotto = {
 };
 
 type ProdottoPayload = Omit<Prodotto, 'id'>;
+type NuovoProdottoPayload = Prodotto;
 
+const SUPABASE_API_URL = 'https://cmpjcuwijckpdgfdkuat.supabase.co/rest/v1/prodotti';
+const SUPABASE_PUBLIC_KEY = 'sb_publishable_L3PkG0FllnfMqrW8mYUAew_V4yGv742';
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=520&q=80';
 
 const IMMAGINI_PRODOTTO: Record<string, string> = {
@@ -44,7 +47,12 @@ const IMMAGINI_PRODOTTO: Record<string, string> = {
 export class AppComponent implements OnInit, OnDestroy {
   private readonly http = inject(HttpClient);
   private readonly cdr = inject(ChangeDetectorRef);
-  private readonly apiUrl = 'http://localhost:3000/prodotti';
+  private readonly apiUrl = SUPABASE_API_URL;
+  private readonly supabaseHeaders = new HttpHeaders({
+    apikey: SUPABASE_PUBLIC_KEY,
+    Authorization: `Bearer ${SUPABASE_PUBLIC_KEY}`,
+    Prefer: 'return=representation'
+  });
 
   prodotti: Prodotto[] = [];
   nuovoNome = '';
@@ -91,18 +99,22 @@ export class AppComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.http.get<Prodotto[]>(this.apiUrl).subscribe({
-      next: (prodotti) => {
-        this.prodotti = prodotti.map((prodotto) => this.normalizzaProdotto(prodotto));
-        this.isLoading = false;
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.isLoading = false;
-        this.errorMessage = 'Impossibile caricare i prodotti. Avvia JSON Server sulla porta 3000.';
-        this.cdr.detectChanges();
-      }
-    });
+    this.http
+      .get<Prodotto[]>(`${this.apiUrl}?select=*&order=created_at.asc`, {
+        headers: this.supabaseHeaders
+      })
+      .subscribe({
+        next: (prodotti) => {
+          this.prodotti = prodotti.map((prodotto) => this.normalizzaProdotto(prodotto));
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.isLoading = false;
+          this.errorMessage = 'Impossibile caricare i prodotti da Supabase. Riprova tra poco.';
+          this.cdr.detectChanges();
+        }
+      });
   }
 
   aggiungiProdotto(): void {
@@ -114,7 +126,8 @@ export class AppComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const nuovoProdotto: ProdottoPayload = {
+    const nuovoProdotto: NuovoProdottoPayload = {
+      id: this.creaIdProdotto(nome),
       nome,
       prezzo: this.nuovoPrezzo,
       disponibile: quantita > 0,
@@ -123,7 +136,7 @@ export class AppComponent implements OnInit, OnDestroy {
     };
 
     this.isSaving = true;
-    this.http.post<Prodotto>(this.apiUrl, nuovoProdotto).subscribe({
+    this.http.post<Prodotto[]>(this.apiUrl, nuovoProdotto, { headers: this.supabaseHeaders }).subscribe({
       next: () => {
         this.nuovoNome = '';
         this.nuovoPrezzo = null;
@@ -134,7 +147,7 @@ export class AppComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.isSaving = false;
-        this.mostraErrore('Non riesco ad aggiungere il prodotto. Controlla JSON Server.');
+        this.mostraErrore('Non riesco ad aggiungere il prodotto su Supabase. Riprova tra poco.');
       }
     });
   }
@@ -152,14 +165,16 @@ export class AppComponent implements OnInit, OnDestroy {
   eliminaProdotto(id: string): void {
     if (!id) return;
 
-    this.http.delete(`${this.apiUrl}/${id}`).subscribe({
-      next: () => {
-        this.pendingDeleteId = null;
-        this.mostraSuccesso('Prodotto eliminato.');
-        this.caricaDati();
-      },
-      error: () => this.mostraErrore('Eliminazione non riuscita. Riprova tra poco.')
-    });
+    this.http
+      .delete(`${this.apiUrl}?id=eq.${encodeURIComponent(id)}`, { headers: this.supabaseHeaders })
+      .subscribe({
+        next: () => {
+          this.pendingDeleteId = null;
+          this.mostraSuccesso('Prodotto eliminato.');
+          this.caricaDati();
+        },
+        error: () => this.mostraErrore('Eliminazione non riuscita. Riprova tra poco.')
+      });
   }
 
   iniziaModifica(prodotto: Prodotto): void {
@@ -199,27 +214,34 @@ export class AppComponent implements OnInit, OnDestroy {
       prezzo: this.editPrezzo,
       disponibile: this.editDisponibile && quantita > 0,
       quantita,
-      immagine: prodottoCorrente?.nome.toLowerCase().trim() === nome.toLowerCase() ? prodottoCorrente.immagine : this.trovaImmagine(nome)
+      immagine:
+        prodottoCorrente?.nome.toLowerCase().trim() === nome.toLowerCase()
+          ? prodottoCorrente.immagine
+          : this.trovaImmagine(nome)
     };
 
     this.isSaving = true;
     this.editingId = null;
     this.cdr.detectChanges();
 
-    this.http.put<Prodotto>(`${this.apiUrl}/${editingIdBackup}`, payload).subscribe({
-      next: () => {
-        this.isSaving = false;
-        this.annullaModifica();
-        this.mostraSuccesso('Prodotto aggiornato.');
-        this.caricaDati();
-      },
-      error: () => {
-        this.isSaving = false;
-        this.editingId = editingIdBackup;
-        this.mostraErrore('Aggiornamento non riuscito. Riprova tra poco.');
-        this.cdr.detectChanges();
-      }
-    });
+    this.http
+      .patch<Prodotto[]>(`${this.apiUrl}?id=eq.${encodeURIComponent(editingIdBackup)}`, payload, {
+        headers: this.supabaseHeaders
+      })
+      .subscribe({
+        next: () => {
+          this.isSaving = false;
+          this.annullaModifica();
+          this.mostraSuccesso('Prodotto aggiornato.');
+          this.caricaDati();
+        },
+        error: () => {
+          this.isSaving = false;
+          this.editingId = editingIdBackup;
+          this.mostraErrore('Aggiornamento non riuscito. Riprova tra poco.');
+          this.cdr.detectChanges();
+        }
+      });
   }
 
   toggleDisponibile(prodotto: Prodotto): void {
@@ -266,17 +288,36 @@ export class AppComponent implements OnInit, OnDestroy {
     prodotto.disponibile = prodotto.disponibile && prodotto.quantita > 0;
     this.cdr.detectChanges();
 
-    this.http.patch<Prodotto>(`${this.apiUrl}/${prodotto.id}`, {
-      disponibile: prodotto.disponibile,
-      quantita: prodotto.quantita
-    }).subscribe({
-      next: () => this.mostraSuccesso(messaggioSuccesso),
-      error: () => {
-        Object.assign(prodotto, backup);
-        this.mostraErrore('Aggiornamento non riuscito. Riprova tra poco.');
-        this.cdr.detectChanges();
-      }
-    });
+    this.http
+      .patch<Prodotto[]>(
+        `${this.apiUrl}?id=eq.${encodeURIComponent(prodotto.id)}`,
+        {
+          disponibile: prodotto.disponibile,
+          quantita: prodotto.quantita
+        },
+        { headers: this.supabaseHeaders }
+      )
+      .subscribe({
+        next: () => this.mostraSuccesso(messaggioSuccesso),
+        error: () => {
+          Object.assign(prodotto, backup);
+          this.mostraErrore('Aggiornamento non riuscito. Riprova tra poco.');
+          this.cdr.detectChanges();
+        }
+      });
+  }
+
+  private creaIdProdotto(nome: string): string {
+    const base =
+      nome
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '')
+        .slice(0, 36) || 'prodotto';
+
+    return `${base}-${Date.now().toString(36)}`;
   }
 
   private normalizzaProdotto(prodotto: Prodotto): Prodotto {

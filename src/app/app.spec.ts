@@ -3,6 +3,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { AppComponent } from './app';
 
+const SUPABASE_PRODUCTS_URL =
+  'https://cmpjcuwijckpdgfdkuat.supabase.co/rest/v1/prodotti?select=*&order=created_at.asc';
+
 describe('AppComponent', () => {
   let httpTesting: HttpTestingController;
 
@@ -28,7 +31,7 @@ describe('AppComponent', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
 
-    const request = httpTesting.expectOne('http://localhost:3000/prodotti');
+    const request = httpTesting.expectOne(SUPABASE_PRODUCTS_URL);
     request.flush([]);
 
     const compiled = fixture.nativeElement as HTMLElement;
@@ -39,7 +42,7 @@ describe('AppComponent', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
 
-    const request = httpTesting.expectOne('http://localhost:3000/prodotti');
+    const request = httpTesting.expectOne(SUPABASE_PRODUCTS_URL);
     request.flush([
       {
         id: '1',

@@ -1,6 +1,6 @@
 # Catalogo Prodotti
 
-Applicazione Angular per gestire un piccolo catalogo di smartphone. Il progetto mostra un flusso CRUD completo con form, validazione essenziale, gestione dell'inventario e integrazione con un backend mock basato su JSON Server.
+Applicazione Angular per gestire un catalogo di smartphone con operazioni CRUD complete. Il progetto mostra form controllati, validazione essenziale, gestione dell'inventario e integrazione con un backend online basato su Supabase.
 
 ## Funzionalità
 
@@ -11,7 +11,7 @@ Applicazione Angular per gestire un piccolo catalogo di smartphone. Il progetto 
 - Aggiornamento rapido dello stato disponibile/esaurito.
 - Incremento e decremento delle quantità disponibili.
 - Messaggi di errore e successo direttamente nella pagina.
-- Dati serviti da `db.json` tramite JSON Server.
+- Dati salvati online tramite Supabase e API REST.
 
 ## Stack
 
@@ -19,7 +19,8 @@ Applicazione Angular per gestire un piccolo catalogo di smartphone. Il progetto 
 - TypeScript
 - Angular Forms
 - HttpClient
-- JSON Server
+- Supabase
+- PostgreSQL
 - SCSS
 
 ## Avvio locale
@@ -30,13 +31,7 @@ Installa le dipendenze:
 npm install
 ```
 
-Avvia il backend mock:
-
-```bash
-npm run json-server
-```
-
-In un secondo terminale avvia Angular:
+Avvia Angular:
 
 ```bash
 npm start
@@ -48,15 +43,11 @@ Apri il browser su:
 http://localhost:4200
 ```
 
-JSON Server espone i dati su:
+## Backend
 
-```text
-http://localhost:3000/prodotti
-```
+Il progetto usa Supabase come backend online. La tabella `prodotti` espone le operazioni CRUD tramite API REST e Row Level Security configurata per l'accesso pubblico della demo.
 
-## Persistenza dei dati
-
-Le modifiche fatte dall'interfaccia vengono salvate in `db.json` mentre JSON Server è in esecuzione. Questo rende il progetto utile per simulare un piccolo backend REST locale, senza dover configurare un database reale.
+La chiave usata nel frontend è una chiave pubblicabile Supabase. Non è una chiave segreta e non concede privilegi amministrativi.
 
 ## Script disponibili
 
@@ -64,9 +55,8 @@ Le modifiche fatte dall'interfaccia vengono salvate in `db.json` mentre JSON Ser
 npm start
 npm run build
 npm test
-npm run json-server
 ```
 
 ## Obiettivo del progetto
 
-Questo progetto è pensato come esercizio portfolio: dimostra gestione dello stato lato componente, comunicazione HTTP, operazioni CRUD, form controllati, aggiornamenti ottimistici e una UI responsive pronta per un piccolo gestionale.
+Questo progetto è pensato come esercizio portfolio: dimostra gestione dello stato lato componente, comunicazione HTTP, operazioni CRUD, form controllati, aggiornamenti ottimistici e integrazione con un database online.
