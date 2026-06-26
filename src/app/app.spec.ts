@@ -66,4 +66,31 @@ describe('AppComponent', () => {
     expect(fixture.componentInstance.prodottiEsauriti).toBe(1);
     expect(fixture.componentInstance.pezziTotali).toBe(3);
   });
+  it('mantiene stabile l\'ordine dei prodotti iniziali', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
+
+    const request = httpTesting.expectOne(SUPABASE_PRODUCTS_URL);
+    request.flush([
+      {
+        id: '2',
+        nome: 'iPhone 14 Pro',
+        prezzo: 799,
+        disponibile: false,
+        quantita: 0,
+        immagine: 'iphone.jpg'
+      },
+      {
+        id: '1',
+        nome: 'Galaxy S22 Ultra',
+        prezzo: 899,
+        disponibile: true,
+        quantita: 2,
+        immagine: 'galaxy.jpg'
+      }
+    ]);
+
+    expect(fixture.componentInstance.prodotti[0].nome).toBe('Galaxy S22 Ultra');
+    expect(fixture.componentInstance.prodotti[1].nome).toBe('iPhone 14 Pro');
+  });
 });

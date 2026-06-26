@@ -19,6 +19,24 @@ const SUPABASE_API_URL = 'https://cmpjcuwijckpdgfdkuat.supabase.co/rest/v1/prodo
 const SUPABASE_PUBLIC_KEY = 'sb_publishable_L3PkG0FllnfMqrW8mYUAew_V4yGv742';
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=520&q=80';
 
+
+const ORDINE_PRODOTTI_INIZIALI: Record<string, number> = {
+  '1': 1,
+  '2': 2,
+  '3': 3,
+  '4': 4,
+  '5': 5,
+  '6': 6,
+  '7': 7,
+  '8': 8,
+  '9': 9,
+  '10': 10,
+  acde: 11,
+  '2968': 12,
+  f022: 13,
+  '2269': 14,
+  zfl6: 15
+};
 const IMMAGINI_PRODOTTO: Record<string, string> = {
   'galaxy s22 ultra': 'https://fdn2.gsmarena.com/vv/bigpic/samsung-galaxy-s22-ultra-5g.jpg',
   'iphone 14 pro': 'https://fdn2.gsmarena.com/vv/bigpic/apple-iphone-14-pro.jpg',
@@ -105,7 +123,9 @@ export class AppComponent implements OnInit, OnDestroy {
       })
       .subscribe({
         next: (prodotti) => {
-          this.prodotti = prodotti.map((prodotto) => this.normalizzaProdotto(prodotto));
+          this.prodotti = prodotti
+            .map((prodotto) => this.normalizzaProdotto(prodotto))
+            .sort((a, b) => this.confrontaProdotti(a, b));
           this.isLoading = false;
           this.cdr.detectChanges();
         },
@@ -305,6 +325,17 @@ export class AppComponent implements OnInit, OnDestroy {
           this.cdr.detectChanges();
         }
       });
+  }
+
+  private confrontaProdotti(a: Prodotto, b: Prodotto): number {
+    const ordineA = ORDINE_PRODOTTI_INIZIALI[a.id] ?? Number.MAX_SAFE_INTEGER;
+    const ordineB = ORDINE_PRODOTTI_INIZIALI[b.id] ?? Number.MAX_SAFE_INTEGER;
+
+    if (ordineA !== ordineB) {
+      return ordineA - ordineB;
+    }
+
+    return a.nome.localeCompare(b.nome, 'it');
   }
 
   private creaIdProdotto(nome: string): string {
