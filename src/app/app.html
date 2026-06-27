@@ -1,28 +1,26 @@
 <div class="page">
   <header class="header">
     <div class="brand" aria-label="DeviceHub">
-      <div class="brand__copy">
-        <h1 class="brand__title">DeviceHub</h1>
-        <p class="brand__subtitle">Inventario digitale per dispositivi tech</p>
-      </div>
+      <img class="brand__image" src="/devicehub-logo.png" alt="DeviceHub - Inventario digitale per dispositivi tech">
+      <h1 class="sr-only">DeviceHub</h1>
     </div>
 
     <div class="stats" aria-label="Statistiche catalogo">
       <div class="stat">
         <span class="stat__value">{{ prodotti.length }}</span>
-        <span class="stat__label">dispositivi</span>
+        <span class="stat__label">dispositivi totali</span>
       </div>
       <div class="stat stat--ok">
         <span class="stat__value">{{ prodottiDisponibili }}</span>
-        <span class="stat__label">disponibili</span>
+        <span class="stat__label">dispositivi disponibili</span>
       </div>
       <div class="stat stat--stock">
         <span class="stat__value">{{ pezziTotali }}</span>
-        <span class="stat__label">pezzi</span>
+        <span class="stat__label">scorte totali</span>
       </div>
       <div class="stat stat--out">
         <span class="stat__value">{{ prodottiEsauriti }}</span>
-        <span class="stat__label">esauriti</span>
+        <span class="stat__label">dispositivi esauriti</span>
       </div>
     </div>
   </header>
