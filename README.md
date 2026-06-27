@@ -1,19 +1,21 @@
-# Catalogo Prodotti
+# DeviceHub
 
-Applicazione Angular per gestire un catalogo di smartphone con operazioni CRUD complete. Il progetto mostra form controllati, validazione essenziale, gestione dell'inventario e integrazione con un backend online basato su Supabase.
+DeviceHub è una web app Angular per gestire un inventario digitale di dispositivi tech. Il progetto mostra un flusso CRUD completo con prodotti salvati online, immagini reali dei dispositivi, gestione delle quantità e interfaccia responsive.
 
 Demo online: [catalogo-prodotti.vercel.app](https://catalogo-prodotti.vercel.app/)
 
 ## Funzionalità
 
-- Visualizzazione dei prodotti con prezzo, immagine, quantità e stato di disponibilità.
-- Aggiunta di nuovi prodotti tramite form controllato.
+- Visualizzazione dei dispositivi con prezzo, immagine, quantità e stato di disponibilità.
+- Aggiunta di nuovi dispositivi tramite form controllato.
+- Caricamento immagine dal computer con anteprima e compressione prima del salvataggio.
 - Modifica di nome, prezzo, quantità e disponibilità.
 - Eliminazione con richiesta di conferma.
 - Aggiornamento rapido dello stato disponibile/esaurito.
 - Incremento e decremento delle quantità disponibili.
 - Messaggi di errore e successo direttamente nella pagina.
 - Dati salvati online tramite Supabase e API REST.
+- Layout responsive pubblicato su Vercel.
 
 ## Stack
 
@@ -24,6 +26,7 @@ Demo online: [catalogo-prodotti.vercel.app](https://catalogo-prodotti.vercel.app
 - Supabase
 - PostgreSQL
 - SCSS
+- Vercel
 
 ## Avvio locale
 
@@ -61,4 +64,4 @@ npm test
 
 ## Obiettivo del progetto
 
-Questo progetto è pensato come esercizio portfolio: dimostra gestione dello stato lato componente, comunicazione HTTP, operazioni CRUD, form controllati, aggiornamenti ottimistici e integrazione con un database online.
+Questo progetto è pensato come esercizio portfolio per mostrare gestione dello stato lato componente, comunicazione HTTP, operazioni CRUD, form controllati, aggiornamenti ottimistici, integrazione con un database online e cura dell'interfaccia utente.

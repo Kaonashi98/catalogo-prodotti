@@ -76,6 +76,8 @@ export class AppComponent implements OnInit, OnDestroy {
   nuovoNome = '';
   nuovoPrezzo: number | null = null;
   nuovaQuantita = 1;
+  nuovaImmaginePreview = '';
+  isProcessingImage = false;
 
   editingId: string | null = null;
   pendingDeleteId: string | null = null;
@@ -131,13 +133,18 @@ export class AppComponent implements OnInit, OnDestroy {
         },
         error: () => {
           this.isLoading = false;
-          this.errorMessage = 'Impossibile caricare i prodotti da Supabase. Riprova tra poco.';
+          this.errorMessage = 'Impossibile caricare i dispositivi da Supabase. Riprova tra poco.';
           this.cdr.detectChanges();
         }
       });
   }
 
   aggiungiProdotto(): void {
+    if (this.isProcessingImage) {
+      this.mostraErrore('Attendi la preparazione dell\'immagine prima di salvare.');
+      return;
+    }
+
     const nome = this.nuovoNome.trim();
     const quantita = this.normalizzaQuantita(this.nuovaQuantita);
 
@@ -152,7 +159,7 @@ export class AppComponent implements OnInit, OnDestroy {
       prezzo: this.nuovoPrezzo,
       disponibile: quantita > 0,
       quantita,
-      immagine: this.trovaImmagine(nome)
+      immagine: this.nuovaImmaginePreview || this.trovaImmagine(nome)
     };
 
     this.isSaving = true;
@@ -161,13 +168,14 @@ export class AppComponent implements OnInit, OnDestroy {
         this.nuovoNome = '';
         this.nuovoPrezzo = null;
         this.nuovaQuantita = 1;
+        this.nuovaImmaginePreview = '';
         this.isSaving = false;
-        this.mostraSuccesso('Prodotto aggiunto al catalogo.');
+        this.mostraSuccesso('Dispositivo aggiunto al catalogo.');
         this.caricaDati();
       },
       error: () => {
         this.isSaving = false;
-        this.mostraErrore('Non riesco ad aggiungere il prodotto su Supabase. Riprova tra poco.');
+        this.mostraErrore('Non riesco ad aggiungere il dispositivo su Supabase. Riprova tra poco.');
       }
     });
   }
@@ -190,7 +198,7 @@ export class AppComponent implements OnInit, OnDestroy {
       .subscribe({
         next: () => {
           this.pendingDeleteId = null;
-          this.mostraSuccesso('Prodotto eliminato.');
+          this.mostraSuccesso('Dispositivo eliminato.');
           this.caricaDati();
         },
         error: () => this.mostraErrore('Eliminazione non riuscita. Riprova tra poco.')
@@ -234,10 +242,7 @@ export class AppComponent implements OnInit, OnDestroy {
       prezzo: this.editPrezzo,
       disponibile: this.editDisponibile && quantita > 0,
       quantita,
-      immagine:
-        prodottoCorrente?.nome.toLowerCase().trim() === nome.toLowerCase()
-          ? prodottoCorrente.immagine
-          : this.trovaImmagine(nome)
+      immagine: prodottoCorrente?.immagine || this.trovaImmagine(nome)
     };
 
     this.isSaving = true;
@@ -252,7 +257,7 @@ export class AppComponent implements OnInit, OnDestroy {
         next: () => {
           this.isSaving = false;
           this.annullaModifica();
-          this.mostraSuccesso('Prodotto aggiornato.');
+          this.mostraSuccesso('Dispositivo aggiornato.');
           this.caricaDati();
         },
         error: () => {
@@ -291,12 +296,91 @@ export class AppComponent implements OnInit, OnDestroy {
     );
   }
 
+
+  selezionaImmagine(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) {
+      this.rimuoviImmagineSelezionata();
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      this.mostraErrore('Seleziona un file immagine valido.');
+      input.value = '';
+      return;
+    }
+
+    if (file.size > 4 * 1024 * 1024) {
+      this.mostraErrore('Seleziona un\'immagine più leggera di 4 MB.');
+      input.value = '';
+      return;
+    }
+
+    this.isProcessingImage = true;
+    this.errorMessage = '';
+
+    this.preparaImmagine(file)
+      .then((immagine) => {
+        this.nuovaImmaginePreview = immagine;
+        this.isProcessingImage = false;
+        this.cdr.detectChanges();
+      })
+      .catch(() => {
+        this.isProcessingImage = false;
+        this.mostraErrore('Non riesco a preparare questa immagine. Prova con un altro file.');
+        this.cdr.detectChanges();
+      });
+  }
+
+  rimuoviImmagineSelezionata(): void {
+    this.nuovaImmaginePreview = '';
+    this.isProcessingImage = false;
+  }
   usaImmagineFallback(prodotto: Prodotto): void {
     if (prodotto.immagine !== FALLBACK_IMAGE) {
       prodotto.immagine = FALLBACK_IMAGE;
     }
   }
 
+
+  private preparaImmagine(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onerror = () => reject();
+      reader.onload = () => {
+        const image = new Image();
+
+        image.onerror = () => reject();
+        image.onload = () => {
+          const maxSize = 640;
+          const ratio = Math.min(1, maxSize / Math.max(image.width, image.height));
+          const width = Math.max(1, Math.round(image.width * ratio));
+          const height = Math.max(1, Math.round(image.height * ratio));
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+
+          if (!context) {
+            reject();
+            return;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          context.fillStyle = '#ffffff';
+          context.fillRect(0, 0, width, height);
+          context.drawImage(image, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/webp', 0.82));
+        };
+
+        image.src = String(reader.result);
+      };
+
+      reader.readAsDataURL(file);
+    });
+  }
   private aggiornaProdotto(
     prodotto: Prodotto,
     modifiche: Partial<Prodotto>,
