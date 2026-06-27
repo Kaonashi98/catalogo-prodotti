@@ -1,11 +1,6 @@
 <div class="page">
   <header class="header">
     <div class="brand" aria-label="DeviceHub">
-      <div class="brand-logo" aria-hidden="true">
-        <span class="brand-logo__screen brand-logo__screen--phone"></span>
-        <span class="brand-logo__screen brand-logo__screen--tablet"></span>
-        <span class="brand-logo__dot"></span>
-      </div>
       <div class="brand__copy">
         <h1 class="brand__title">DeviceHub</h1>
         <p class="brand__subtitle">Inventario digitale per dispositivi tech</p>
@@ -50,22 +45,23 @@
       <div class="form">
         <label class="field">
           <span class="field__label">Nome dispositivo</span>
-          <input class="field__control" type="text" [(ngModel)]="nuovoNome" placeholder="Es. iPhone 15, Galaxy Watch, iPad" autocomplete="off">
+          <input class="field__control" type="text" [(ngModel)]="nuovoNome" placeholder="Es. iPhone 15, Galaxy Watch, iPad" autocomplete="off" required>
         </label>
 
         <label class="field">
           <span class="field__label">Prezzo</span>
-          <input class="field__control" type="number" [(ngModel)]="nuovoPrezzo" placeholder="0" min="1">
+          <input class="field__control" type="number" [(ngModel)]="nuovoPrezzo" placeholder="0" min="1" [disabled]="!nuovoNomeValido" required>
         </label>
 
         <label class="field">
           <span class="field__label">Quantità iniziale</span>
-          <input class="field__control" type="number" [(ngModel)]="nuovaQuantita" placeholder="1" min="0">
+          <input class="field__control" type="number" [(ngModel)]="nuovaQuantita" placeholder="1" min="0" [disabled]="!nuovoPrezzoValido" required>
         </label>
 
         <label class="field field--file">
           <span class="field__label">Immagine dispositivo</span>
-          <input class="field__control field__control--file" type="file" accept="image/*" (change)="selezionaImmagine($event)">
+          <input class="field__control field__control--file" type="file" accept="image/*" (change)="selezionaImmagine($event)" [disabled]="!nuovaQuantitaValida" required>
+          <span class="field__helper">Carica una foto reale e specifica del dispositivo che stai aggiungendo.</span>
         </label>
 
         @if (nuovaImmaginePreview) {

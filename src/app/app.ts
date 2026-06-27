@@ -39,6 +39,7 @@ const ORDINE_PRODOTTI_INIZIALI: Record<string, number> = {
 };
 const IMMAGINI_PRODOTTO: Record<string, string> = {
   'galaxy s22 ultra': 'https://fdn2.gsmarena.com/vv/bigpic/samsung-galaxy-s22-ultra-5g.jpg',
+  'galaxy s23 ultra': 'https://fdn2.gsmarena.com/vv/bigpic/samsung-galaxy-s23-ultra-5g.jpg',
   'iphone 14 pro': 'https://fdn2.gsmarena.com/vv/bigpic/apple-iphone-14-pro.jpg',
   'pixel 6': 'https://fdn2.gsmarena.com/vv/bigpic/google-pixel-6.jpg',
   'oneplus 10 pro': 'https://fdn2.gsmarena.com/vv/bigpic/oneplus-10-pro.jpg',
@@ -95,6 +96,22 @@ export class AppComponent implements OnInit, OnDestroy {
   private fadeTimer: ReturnType<typeof setTimeout> | null = null;
   private clearTimer: ReturnType<typeof setTimeout> | null = null;
 
+
+  get nuovoNomeValido(): boolean {
+    return this.nuovoNome.trim().length > 0;
+  }
+
+  get nuovoPrezzoValido(): boolean {
+    return this.nuovoNomeValido && this.nuovoPrezzo !== null && Number(this.nuovoPrezzo) > 0;
+  }
+
+  get nuovaQuantitaValida(): boolean {
+    return this.nuovoPrezzoValido && this.nuovaQuantita !== null && Number.isFinite(Number(this.nuovaQuantita)) && Number(this.nuovaQuantita) >= 0;
+  }
+
+  get nuovaImmagineValida(): boolean {
+    return this.nuovaImmaginePreview.trim().length > 0;
+  }
   get prodottiDisponibili(): number {
     return this.prodotti.filter((prodotto) => prodotto.disponibile && prodotto.quantita > 0).length;
   }
@@ -148,18 +165,33 @@ export class AppComponent implements OnInit, OnDestroy {
     const nome = this.nuovoNome.trim();
     const quantita = this.normalizzaQuantita(this.nuovaQuantita);
 
-    if (!nome || !this.nuovoPrezzo || this.nuovoPrezzo <= 0) {
-      this.mostraErrore('Inserisci un nome e un prezzo maggiore di 0.');
+    if (!this.nuovoNomeValido) {
+      this.mostraErrore('Inserisci il nome del dispositivo.');
+      return;
+    }
+
+    if (!this.nuovoPrezzoValido) {
+      this.mostraErrore('Inserisci un prezzo maggiore di 0.');
+      return;
+    }
+
+    if (!this.nuovaQuantitaValida) {
+      this.mostraErrore('Inserisci una quantità iniziale valida.');
+      return;
+    }
+
+    if (!this.nuovaImmagineValida) {
+      this.mostraErrore('Carica una foto reale e specifica del dispositivo.');
       return;
     }
 
     const nuovoProdotto: NuovoProdottoPayload = {
       id: this.creaIdProdotto(nome),
       nome,
-      prezzo: this.nuovoPrezzo,
+      prezzo: this.nuovoPrezzo!,
       disponibile: quantita > 0,
       quantita,
-      immagine: this.nuovaImmaginePreview || this.trovaImmagine(nome)
+      immagine: this.nuovaImmaginePreview
     };
 
     this.isSaving = true;

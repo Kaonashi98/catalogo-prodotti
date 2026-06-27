@@ -93,4 +93,18 @@ describe('AppComponent', () => {
     expect(fixture.componentInstance.prodotti[0].nome).toBe('Galaxy S22 Ultra');
     expect(fixture.componentInstance.prodotti[1].nome).toBe('iPhone 14 Pro');
   });
+  it('richiede una foto specifica prima di aggiungere un dispositivo', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
+
+    const request = httpTesting.expectOne(SUPABASE_PRODUCTS_URL);
+    request.flush([]);
+
+    fixture.componentInstance.nuovoNome = 'Galaxy S23 Ultra';
+    fixture.componentInstance.nuovoPrezzo = 899;
+    fixture.componentInstance.nuovaQuantita = 2;
+    fixture.componentInstance.aggiungiProdotto();
+
+    expect(fixture.componentInstance.errorMessage).toBe('Carica una foto reale e specifica del dispositivo.');
+  });
 });
