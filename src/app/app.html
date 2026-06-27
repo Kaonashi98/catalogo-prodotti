@@ -1,10 +1,20 @@
 <div class="page">
-  <header class="header">
-    <div class="brand" aria-label="DeviceHub">
-      <img class="brand__image" src="/devicehub-logo.png" alt="DeviceHub - Inventario digitale per dispositivi tech">
+
+  @if (errorMessage) {
+    <div class="notice notice--error" role="alert">{{ errorMessage }}</div>
+  }
+
+  @if (successMessage) {
+    <div class="notice notice--success" [class.notice--fade]="isSuccessFading" role="status">
+      {{ successMessage }}
+    </div>
+  }
+
+  <main class="workspace">
+    <div class="panel-brand" aria-label="DeviceHub">
+      <img class="panel-brand__image" src="/devicehub-logo.png" alt="DeviceHub - Inventario digitale per dispositivi tech">
       <h1 class="sr-only">DeviceHub</h1>
     </div>
-
     <div class="stats" aria-label="Statistiche catalogo">
       <div class="stat">
         <span class="stat__value">{{ prodotti.length }}</span>
@@ -23,19 +33,8 @@
         <span class="stat__label">dispositivi esauriti</span>
       </div>
     </div>
-  </header>
 
-  @if (errorMessage) {
-    <div class="notice notice--error" role="alert">{{ errorMessage }}</div>
-  }
 
-  @if (successMessage) {
-    <div class="notice notice--success" [class.notice--fade]="isSuccessFading" role="status">
-      {{ successMessage }}
-    </div>
-  }
-
-  <main class="workspace">
     <section class="panel add-panel" aria-labelledby="add-product-title">
       <p class="section-kicker">Nuovo dispositivo</p>
       <h2 id="add-product-title" class="panel__title">Aggiungi dispositivo</h2>
