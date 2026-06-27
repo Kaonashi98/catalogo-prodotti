@@ -44,14 +44,15 @@ const IMMAGINI_PRODOTTO: Record<string, string> = {
   'pixel 6': 'https://fdn2.gsmarena.com/vv/bigpic/google-pixel-6.jpg',
   'oneplus 10 pro': 'https://fdn2.gsmarena.com/vv/bigpic/oneplus-10-pro.jpg',
   'xperia 1 iii': 'https://fdn2.gsmarena.com/vv/bigpic/sony-xperia-1-iii.jpg',
-  'moto g power': 'https://fdn2.gsmarena.com/vv/bigpic/motorola-moto-g-power-2022.jpg',
-  'nokia xr20': 'https://fdn2.gsmarena.com/vv/bigpic/nokia-xr20.jpg',
+  'moto g power 2022': 'https://p4-ofp.static.pub//fes/cms/2024/11/15/qlbq5a3q9e3t7uzw0ptg6kspws1dga729330.jpg',
+  'moto g power': 'https://p4-ofp.static.pub//fes/cms/2024/11/15/qlbq5a3q9e3t7uzw0ptg6kspws1dga729330.jpg',
+  'nokia xr20': 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Nokia_XR20-front_PNr%C2%B01006.jpg/250px-Nokia_XR20-front_PNr%C2%B01006.jpg',
   'asus rog phone 5': 'https://fdn2.gsmarena.com/vv/bigpic/asus-rog-phone-5.jpg',
-  'lg velvet': 'https://fdn2.gsmarena.com/vv/bigpic/lg-velvet.jpg',
+  'lg velvet': 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/LG_Velvet_Aurora_Green_version.jpg/250px-LG_Velvet_Aurora_Green_version.jpg',
   'htc u12+': 'https://fdn2.gsmarena.com/vv/bigpic/htc-u12-plus-.jpg',
   'iphone 15': 'https://fdn2.gsmarena.com/vv/bigpic/apple-iphone-15.jpg',
   'iphone 15 pro': 'https://fdn2.gsmarena.com/vv/bigpic/apple-iphone-15-pro.jpg',
-  'galaxy s25 ultra': 'https://fdn2.gsmarena.com/vv/bigpic/samsung-galaxy-s25-ultra.jpg',
+  'galaxy s25 ultra': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/%E7%AC%AC%E4%B8%80%E6%89%8B%EF%BC%81Samsung_Galaxy_S25%E7%B3%BB%E5%88%97%E6%8B%BF%E5%88%B0%E4%BA%86%EF%BC%9A5%E4%B8%AA%E5%8D%87%E7%BA%A7%EF%BC%81S_Pen%E4%B8%8D%E6%94%AF%E6%8C%81%E8%93%9D%E7%89%99%E4%BA%86%EF%BC%9F_%282160p_50fps_VP9-96kbit_AAC%29-00.06.03.789.png/250px-%E7%AC%AC%E4%B8%80%E6%89%8B%EF%BC%81Samsung_Galaxy_S25%E7%B3%BB%E5%88%97%E6%8B%BF%E5%88%B0%E4%BA%86%EF%BC%9A5%E4%B8%AA%E5%8D%87%E7%BA%A7%EF%BC%81S_Pen%E4%B8%8D%E6%94%AF%E6%8C%81%E8%93%9D%E7%89%99%E4%BA%86%EF%BC%9F_%282160p_50fps_VP9-96kbit_AAC%29-00.06.03.789.png',
   'google pixel 9 pro xl': 'https://fdn2.gsmarena.com/vv/bigpic/google-pixel-9-pro-xl-.jpg',
   'galaxy z flip6': 'https://fdn2.gsmarena.com/vv/bigpic/samsung-galaxy-z-flip6.jpg'
 };
@@ -469,12 +470,13 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private normalizzaProdotto(prodotto: Prodotto): Prodotto {
     const quantita = this.normalizzaQuantita(prodotto.quantita ?? (prodotto.disponibile ? 3 : 0));
+    const immagineUfficiale = this.trovaImmagine(prodotto.nome);
 
     return {
       ...prodotto,
       quantita,
       disponibile: prodotto.disponibile && quantita > 0,
-      immagine: prodotto.immagine || this.trovaImmagine(prodotto.nome)
+      immagine: immagineUfficiale !== FALLBACK_IMAGE ? immagineUfficiale : prodotto.immagine || FALLBACK_IMAGE
     };
   }
 
@@ -485,7 +487,10 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private trovaImmagine(nome: string): string {
     const nomeNormalizzato = nome.toLowerCase().trim();
-    const chiave = Object.keys(IMMAGINI_PRODOTTO).find((prodotto) => nomeNormalizzato.includes(prodotto));
+    const chiave = Object.keys(IMMAGINI_PRODOTTO)
+      .sort((a, b) => b.length - a.length)
+      .find((prodotto) => nomeNormalizzato.includes(prodotto));
+
     return chiave ? IMMAGINI_PRODOTTO[chiave] : FALLBACK_IMAGE;
   }
 

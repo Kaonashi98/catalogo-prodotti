@@ -93,6 +93,53 @@ describe('AppComponent', () => {
     expect(fixture.componentInstance.prodotti[0].nome).toBe('Galaxy S22 Ultra');
     expect(fixture.componentInstance.prodotti[1].nome).toBe('iPhone 14 Pro');
   });
+
+  it('usa immagini ufficiali per i dispositivi noti anche se il backend contiene una foto sbagliata', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
+
+    const request = httpTesting.expectOne(SUPABASE_PRODUCTS_URL);
+    request.flush([
+      {
+        id: '7',
+        nome: 'Nokia XR20',
+        prezzo: 90,
+        disponibile: true,
+        quantita: 4,
+        immagine: 'immagine-sbagliata.jpg'
+      },
+      {
+        id: '2968',
+        nome: 'Galaxy S25 Ultra',
+        prezzo: 1699,
+        disponibile: true,
+        quantita: 2,
+        immagine: 'foto-non-corrispondente.jpg'
+      }
+    ]);
+
+    expect(fixture.componentInstance.prodotti[0].immagine.toLowerCase()).toContain('nokia_xr20');
+    expect(fixture.componentInstance.prodotti[1].immagine).toContain('upload.wikimedia.org');
+  });
+
+  it('sceglie la corrispondenza immagine piu specifica quando i nomi sono simili', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
+
+    const request = httpTesting.expectOne(SUPABASE_PRODUCTS_URL);
+    request.flush([
+      {
+        id: '2269',
+        nome: 'iPhone 15 Pro',
+        prezzo: 1239,
+        disponibile: true,
+        quantita: 1,
+        immagine: 'iphone-generico.jpg'
+      }
+    ]);
+
+    expect(fixture.componentInstance.prodotti[0].immagine).toContain('apple-iphone-15-pro.jpg');
+  });
   it('richiede una foto specifica prima di aggiungere un dispositivo', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
