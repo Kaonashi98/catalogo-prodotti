@@ -42,23 +42,35 @@
       <div class="form">
         <label class="field">
           <span class="field__label">Nome dispositivo</span>
-          <input class="field__control" type="text" [(ngModel)]="nuovoNome" placeholder="Es. iPhone 15, Galaxy Watch, iPad" autocomplete="off" required>
+          <input class="field__control" type="text" [(ngModel)]="nuovoNome" (ngModelChange)="pulisciErroreNuovoProdotto('nome')" placeholder="Es. iPhone 15, Galaxy Watch, iPad" autocomplete="off" required>
+          @if (nuovoProdottoErrors.nome) {
+            <span class="field__error" role="alert">{{ nuovoProdottoErrors.nome }}</span>
+          }
         </label>
 
         <label class="field">
           <span class="field__label">Prezzo</span>
-          <input class="field__control" type="number" [(ngModel)]="nuovoPrezzo" placeholder="0" min="1" [disabled]="!nuovoNomeValido" required>
+          <input class="field__control" type="number" [(ngModel)]="nuovoPrezzo" (ngModelChange)="pulisciErroreNuovoProdotto('prezzo')" placeholder="0" min="1" [disabled]="!nuovoNomeValido" required>
+          @if (nuovoProdottoErrors.prezzo) {
+            <span class="field__error" role="alert">{{ nuovoProdottoErrors.prezzo }}</span>
+          }
         </label>
 
         <label class="field">
           <span class="field__label">Quantità iniziale</span>
-          <input class="field__control" type="number" [(ngModel)]="nuovaQuantita" placeholder="1" min="0" [disabled]="!nuovoPrezzoValido" required>
+          <input class="field__control" type="number" [(ngModel)]="nuovaQuantita" (ngModelChange)="pulisciErroreNuovoProdotto('quantita')" placeholder="1" min="0" [disabled]="!nuovoPrezzoValido" required>
+          @if (nuovoProdottoErrors.quantita) {
+            <span class="field__error" role="alert">{{ nuovoProdottoErrors.quantita }}</span>
+          }
         </label>
 
         <label class="field field--file">
           <span class="field__label">Immagine dispositivo</span>
-          <input class="field__control field__control--file" type="file" accept="image/*" (change)="selezionaImmagine($event)" [disabled]="!nuovaQuantitaValida" required>
+          <input #nuovaImmagineInput class="field__control field__control--file" type="file" accept="image/*" (change)="selezionaImmagine($event)" [disabled]="!nuovaQuantitaValida" required>
           <span class="field__helper">Carica una foto reale e specifica del dispositivo che stai aggiungendo.</span>
+          @if (nuovoProdottoErrors.immagine) {
+            <span class="field__error" role="alert">{{ nuovoProdottoErrors.immagine }}</span>
+          }
         </label>
 
         @if (nuovaImmaginePreview) {

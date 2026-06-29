@@ -140,6 +140,37 @@ describe('AppComponent', () => {
 
     expect(fixture.componentInstance.prodotti[0].immagine).toContain('apple-iphone-15-pro.jpg');
   });
+
+  it('resetta i campi del form dopo avere aggiunto un dispositivo', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
+
+    const initialRequest = httpTesting.expectOne(SUPABASE_PRODUCTS_URL);
+    initialRequest.flush([]);
+
+    fixture.componentInstance.nuovoNome = 'Galaxy Watch 7';
+    fixture.componentInstance.nuovoPrezzo = 299;
+    fixture.componentInstance.nuovaQuantita = 5;
+    fixture.componentInstance.nuovaImmaginePreview = 'data:image/webp;base64,preview';
+    fixture.componentInstance.aggiungiProdotto();
+
+    const addRequest = httpTesting.expectOne('https://cmpjcuwijckpdgfdkuat.supabase.co/rest/v1/prodotti');
+    addRequest.flush([]);
+
+    expect(fixture.componentInstance.nuovoNome).toBe('');
+    expect(fixture.componentInstance.nuovoPrezzo).toBeNull();
+    expect(fixture.componentInstance.nuovaQuantita).toBeNull();
+    expect(fixture.componentInstance.nuovaImmaginePreview).toBe('');
+    expect(fixture.componentInstance.nuovoProdottoErrors).toEqual({
+      nome: '',
+      prezzo: '',
+      quantita: '',
+      immagine: ''
+    });
+
+    const reloadRequest = httpTesting.expectOne(SUPABASE_PRODUCTS_URL);
+    reloadRequest.flush([]);
+  });
   it('richiede una foto specifica prima di aggiungere un dispositivo', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
@@ -152,6 +183,7 @@ describe('AppComponent', () => {
     fixture.componentInstance.nuovaQuantita = 2;
     fixture.componentInstance.aggiungiProdotto();
 
-    expect(fixture.componentInstance.errorMessage).toBe('Carica una foto reale e specifica del dispositivo.');
+    expect(fixture.componentInstance.errorMessage).toBe('');
+    expect(fixture.componentInstance.nuovoProdottoErrors.immagine).toBe('Carica una foto reale e specifica del dispositivo.');
   });
 });

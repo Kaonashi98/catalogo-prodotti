@@ -229,6 +229,13 @@
   line-height: 1.35;
   font-weight: 700;
 }
+
+.field__error {
+  color: #991b1b;
+  font-size: 12px;
+  line-height: 1.35;
+  font-weight: 800;
+}
 .field__control--file {
   min-height: auto;
   padding: 10px;

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -14,6 +14,12 @@ type Prodotto = {
 
 type ProdottoPayload = Omit<Prodotto, 'id'>;
 type NuovoProdottoPayload = Prodotto;
+type NuovoProdottoFormErrors = {
+  nome: string;
+  prezzo: string;
+  quantita: string;
+  immagine: string;
+};
 
 const SUPABASE_API_URL = 'https://cmpjcuwijckpdgfdkuat.supabase.co/rest/v1/prodotti';
 const SUPABASE_PUBLIC_KEY = 'sb_publishable_L3PkG0FllnfMqrW8mYUAew_V4yGv742';
@@ -65,6 +71,8 @@ const IMMAGINI_PRODOTTO: Record<string, string> = {
   styleUrls: ['./app.scss']
 })
 export class AppComponent implements OnInit, OnDestroy {
+  @ViewChild('nuovaImmagineInput') private nuovaImmagineInput?: ElementRef<HTMLInputElement>;
+
   private readonly http = inject(HttpClient);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly apiUrl = SUPABASE_API_URL;
@@ -77,8 +85,9 @@ export class AppComponent implements OnInit, OnDestroy {
   prodotti: Prodotto[] = [];
   nuovoNome = '';
   nuovoPrezzo: number | null = null;
-  nuovaQuantita = 1;
+  nuovaQuantita: number | null = null;
   nuovaImmaginePreview = '';
+  nuovoProdottoErrors: NuovoProdottoFormErrors = this.creaErroriNuovoProdotto();
   isProcessingImage = false;
 
   editingId: string | null = null;
@@ -159,30 +168,20 @@ export class AppComponent implements OnInit, OnDestroy {
 
   aggiungiProdotto(): void {
     if (this.isProcessingImage) {
-      this.mostraErrore('Attendi la preparazione dell\'immagine prima di salvare.');
+      this.nuovoProdottoErrors = { ...this.creaErroriNuovoProdotto(), immagine: 'Attendi la preparazione dell\'immagine prima di salvare.' };
+      this.errorMessage = '';
+      this.cdr.detectChanges();
       return;
     }
 
     const nome = this.nuovoNome.trim();
     const quantita = this.normalizzaQuantita(this.nuovaQuantita);
 
-    if (!this.nuovoNomeValido) {
-      this.mostraErrore('Inserisci il nome del dispositivo.');
-      return;
-    }
+    this.nuovoProdottoErrors = this.validaNuovoProdotto();
 
-    if (!this.nuovoPrezzoValido) {
-      this.mostraErrore('Inserisci un prezzo maggiore di 0.');
-      return;
-    }
-
-    if (!this.nuovaQuantitaValida) {
-      this.mostraErrore('Inserisci una quantità iniziale valida.');
-      return;
-    }
-
-    if (!this.nuovaImmagineValida) {
-      this.mostraErrore('Carica una foto reale e specifica del dispositivo.');
+    if (this.haErroriNuovoProdotto()) {
+      this.errorMessage = '';
+      this.cdr.detectChanges();
       return;
     }
 
@@ -198,10 +197,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.isSaving = true;
     this.http.post<Prodotto[]>(this.apiUrl, nuovoProdotto, { headers: this.supabaseHeaders }).subscribe({
       next: () => {
-        this.nuovoNome = '';
-        this.nuovoPrezzo = null;
-        this.nuovaQuantita = 1;
-        this.nuovaImmaginePreview = '';
+        this.resetNuovoProdottoForm();
         this.isSaving = false;
         this.mostraSuccesso('Dispositivo aggiunto al catalogo.');
         this.caricaDati();
@@ -340,13 +336,15 @@ export class AppComponent implements OnInit, OnDestroy {
     }
 
     if (!file.type.startsWith('image/')) {
-      this.mostraErrore('Seleziona un file immagine valido.');
+      this.nuovoProdottoErrors.immagine = 'Seleziona un file immagine valido.';
+      this.errorMessage = '';
       input.value = '';
       return;
     }
 
     if (file.size > 4 * 1024 * 1024) {
-      this.mostraErrore('Seleziona un\'immagine più leggera di 4 MB.');
+      this.nuovoProdottoErrors.immagine = 'Seleziona un\'immagine più leggera di 4 MB.';
+      this.errorMessage = '';
       input.value = '';
       return;
     }
@@ -362,7 +360,8 @@ export class AppComponent implements OnInit, OnDestroy {
       })
       .catch(() => {
         this.isProcessingImage = false;
-        this.mostraErrore('Non riesco a preparare questa immagine. Prova con un altro file.');
+        this.nuovoProdottoErrors.immagine = 'Non riesco a preparare questa immagine. Prova con un altro file.';
+        this.errorMessage = '';
         this.cdr.detectChanges();
       });
   }
@@ -370,7 +369,16 @@ export class AppComponent implements OnInit, OnDestroy {
   rimuoviImmagineSelezionata(): void {
     this.nuovaImmaginePreview = '';
     this.isProcessingImage = false;
+    this.nuovoProdottoErrors.immagine = '';
+    if (this.nuovaImmagineInput?.nativeElement) {
+      this.nuovaImmagineInput.nativeElement.value = '';
+    }
   }
+
+  pulisciErroreNuovoProdotto(campo: keyof NuovoProdottoFormErrors): void {
+    this.nuovoProdottoErrors[campo] = '';
+  }
+
   usaImmagineFallback(prodotto: Prodotto): void {
     if (prodotto.immagine !== FALLBACK_IMAGE) {
       prodotto.immagine = FALLBACK_IMAGE;
@@ -378,6 +386,53 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
 
+  private creaErroriNuovoProdotto(): NuovoProdottoFormErrors {
+    return {
+      nome: '',
+      prezzo: '',
+      quantita: '',
+      immagine: ''
+    };
+  }
+
+  private validaNuovoProdotto(): NuovoProdottoFormErrors {
+    const errors = this.creaErroriNuovoProdotto();
+
+    if (!this.nuovoNomeValido) {
+      errors.nome = 'Inserisci il nome del dispositivo.';
+    }
+
+    if (!this.nuovoPrezzoValido) {
+      errors.prezzo = 'Inserisci un prezzo maggiore di 0.';
+    }
+
+    if (!this.nuovaQuantitaValida) {
+      errors.quantita = 'Inserisci una quantità iniziale valida.';
+    }
+
+    if (!this.nuovaImmagineValida) {
+      errors.immagine = 'Carica una foto reale e specifica del dispositivo.';
+    }
+
+    return errors;
+  }
+
+  private haErroriNuovoProdotto(): boolean {
+    return Object.values(this.nuovoProdottoErrors).some(Boolean);
+  }
+
+  private resetNuovoProdottoForm(): void {
+    this.nuovoNome = '';
+    this.nuovoPrezzo = null;
+    this.nuovaQuantita = null;
+    this.nuovaImmaginePreview = '';
+    this.nuovoProdottoErrors = this.creaErroriNuovoProdotto();
+    this.isProcessingImage = false;
+
+    if (this.nuovaImmagineInput?.nativeElement) {
+      this.nuovaImmagineInput.nativeElement.value = '';
+    }
+  }
   private preparaImmagine(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
