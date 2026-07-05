@@ -146,7 +146,7 @@
               } @else {
                 <div class="card__top">
                   <figure class="product-media">
-                    <img [src]="prodotto.immagine" [alt]="prodotto.nome" loading="lazy" (error)="usaImmagineFallback(prodotto)">
+                    <img [src]="prodotto.immagine" [alt]="prodotto.nome" title="prodotto.nome" loading="lazy" (error)="usaImmagineFallback(prodotto)">
                   </figure>
                   <span class="pill" [class.pill--ok]="prodotto.disponibile" [class.pill--out]="!prodotto.disponibile">
                     {{ prodotto.disponibile ? 'Disponibile' : 'Esaurito' }}
