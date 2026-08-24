@@ -300,7 +300,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   toggleDisponibile(prodotto: Prodotto): void {
     const disponibile = !prodotto.disponibile;
-    const quantita = disponibile && prodotto.quantita === 0 ? 1 : prodotto.quantita;
+    const quantita = disponibile ? Math.max(1, prodotto.quantita) : 0;
 
     this.aggiornaProdotto(prodotto, { disponibile, quantita }, 'Disponibilità aggiornata.');
   }

@@ -186,4 +186,34 @@ describe('AppComponent', () => {
     expect(fixture.componentInstance.errorMessage).toBe('');
     expect(fixture.componentInstance.nuovoProdottoErrors.immagine).toBe('Carica una foto reale e specifica del dispositivo.');
   });
+
+  it('azzera la quantità quando un dispositivo viene segnato come esaurito', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
+
+    const initialRequest = httpTesting.expectOne(SUPABASE_PRODUCTS_URL);
+    initialRequest.flush([
+      {
+        id: '6',
+        nome: 'Moto G Power',
+        prezzo: 80,
+        disponibile: true,
+        quantita: 5,
+        immagine: 'moto-g-power.jpg'
+      }
+    ]);
+
+    const prodotto = fixture.componentInstance.prodotti[0];
+    fixture.componentInstance.toggleDisponibile(prodotto);
+
+    expect(prodotto.disponibile).toBe(false);
+    expect(prodotto.quantita).toBe(0);
+
+    const updateRequest = httpTesting.expectOne(
+      'https://cmpjcuwijckpdgfdkuat.supabase.co/rest/v1/prodotti?id=eq.6'
+    );
+    expect(updateRequest.request.method).toBe('PATCH');
+    expect(updateRequest.request.body).toEqual({ disponibile: false, quantita: 0 });
+    updateRequest.flush([]);
+  });
 });
