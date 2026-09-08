@@ -1,0 +1,294 @@
+// Controlli condivisi tra catalogo, gestione e moduli.
+app-root {
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 46px;
+    padding: 12px 18px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 650;
+    text-decoration: none;
+    box-shadow: 0 2px 0 #142c4b18;
+    transition:
+      background 0.18s,
+      box-shadow 0.18s,
+      transform 0.18s;
+    &:active:not(:disabled) {
+      transform: translateY(1px);
+      box-shadow: none;
+    }
+  }
+
+  .btn--primary {
+    background: var(--blue);
+    color: #fff;
+    border-color: #224bbf;
+    box-shadow:
+      0 3px 0 #1b3e9d,
+      0 5px 14px #2854d51a;
+    &:hover:not(:disabled) {
+      background: #193fad;
+      box-shadow:
+        0 3px 0 #163481,
+        0 7px 18px #2854d533;
+    }
+  }
+
+  .btn--dark {
+    background: var(--ink);
+    color: #fff;
+    min-height: 48px;
+    span {
+      font-size: 22px;
+      margin-left: 12px;
+    }
+    &:hover {
+      background: #303c55;
+      transform: translateY(-2px);
+    }
+  }
+
+  .btn--ghost {
+    background: #eef3fc;
+    border-color: #a7b9d5;
+    color: #304f7e;
+    &:hover:not(:disabled) {
+      background: #dce8fc;
+      border-color: #5a7eb5;
+    }
+  }
+
+  .btn--danger {
+    background: #af2840;
+    color: #fff;
+    border-color: #912338;
+    &:hover:not(:disabled) {
+      background: #8f1930;
+    }
+  }
+
+  .btn--danger-text {
+    background: #fff0f1;
+    color: #9c2338;
+    border-color: #dc9aa6;
+    &:hover:not(:disabled) {
+      background: #fbdce2;
+      border-color: #be4d64;
+    }
+  }
+
+  .btn--wide {
+    width: 100%;
+  }
+
+  .text-button {
+    border: 1px solid #a2b9df;
+    border-radius: 8px;
+    background: #e8f0ff;
+    font-size: 12px;
+    font-weight: 650;
+    color: #274d93;
+    padding: 9px 12px;
+    min-height: 40px;
+    &:hover {
+      background: #d5e3ff;
+      border-color: #5e81bc;
+    }
+  }
+
+  .check {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 13px;
+    min-height: 36px;
+    margin: 0 0 14px;
+    input {
+      accent-color: var(--blue);
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+  }
+
+  .notice {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 30;
+    max-width: min(560px, calc(100% - 32px));
+    padding: 15px 22px;
+    border-radius: 10px;
+    box-shadow: 0 10px 40px #22344c26;
+    font-size: 13px;
+    line-height: 1.5;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    transition: opacity 0.35s;
+    button {
+      color: inherit;
+      border: 0;
+      background: transparent;
+      font-size: 20px;
+    }
+  }
+
+  .notice--success {
+    background: #e9f7f0;
+    border: 1px solid #a9d5bf;
+    color: #2c7053;
+  }
+
+  .notice--error {
+    background: #fff0f1;
+    border: 1px solid #f1b3bb;
+    color: #9a293d;
+  }
+
+  .notice--fade {
+    opacity: 0;
+  }
+
+  .close-button {
+    border: 1px solid #aabdd9;
+    background: #e7eefb;
+    color: #315786;
+    border-radius: 9px;
+    width: 44px;
+    height: 44px;
+    font-size: 26px;
+    flex-shrink: 0;
+    &:hover:not(:disabled) {
+      background: #d5e2fa;
+    }
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    > span:first-child {
+      font-size: 13px;
+      font-weight: 650;
+      color: #3e536f;
+    }
+    input {
+      width: 100%;
+      padding: 11px 12px;
+      background: #fff;
+      border: 1px solid #a9bbd5;
+      border-radius: 8px;
+      font-size: 15px;
+      min-height: 46px;
+      color: var(--ink);
+    }
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+
+  .field-error {
+    font-size: 12px;
+    color: #a22b40;
+    line-height: 1.5;
+  }
+
+  .upload-field {
+    text-align: center;
+    border: 1px dashed #8fa9cf;
+    border-radius: 12px;
+    padding: 17px;
+    background: #edf3fd;
+    align-items: center;
+    > span:first-child {
+      align-self: flex-start;
+    }
+    .upload-symbol {
+      font-size: 26px;
+      color: var(--blue);
+    }
+    strong {
+      font-size: 14px;
+    }
+    small {
+      color: #4b5f7e;
+      font-size: 12px;
+    }
+    .field-error {
+      color: #a22b40;
+    }
+    input {
+      border: 0;
+      font-size: 12px;
+      min-height: 44px;
+      padding: 8px 0;
+      background: transparent;
+      &::file-selector-button {
+        background: #2854d5;
+        color: #fff;
+        border: 1px solid #234aba;
+        border-radius: 8px;
+        padding: 11px 13px;
+        margin-right: 10px;
+        font: inherit;
+        font-weight: 650;
+        cursor: pointer;
+      }
+    }
+  }
+  .image-preview {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    img {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      border-radius: 8px;
+      background: #f2f4f8;
+    }
+  }
+
+  .stepper {
+    display: flex;
+    height: 44px;
+    border: 1px solid #96afd1;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+    flex-shrink: 0;
+    button {
+      border: 0;
+      width: 40px;
+      color: #234f93;
+      background: #e1ebfc;
+      font-size: 20px;
+      &:hover:not(:disabled) {
+        background: #c9dbf9;
+      }
+    }
+    input {
+      width: 42px;
+      padding: 0;
+      text-align: center;
+      border: 0;
+      border-inline: 1px solid #bdcce2;
+      font-size: 14px;
+      appearance: textfield;
+      &::-webkit-inner-spin-button,
+      &::-webkit-outer-spin-button {
+        appearance: none;
+      }
+    }
+  }
+}

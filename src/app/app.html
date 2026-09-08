@@ -12,9 +12,15 @@
       />
     </a>
     <nav aria-label="Navigazione principale">
-      <a href="#catalogo" class="nav-active"
-        >Catalogo <span>{{ prodotti.length }}</span></a
-      ><a href="#fonti">Prezzi e fonti</a>
+      <a href="#catalogo" class="catalog-nav">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="3" y="3" width="7" height="7" rx="1.5" />
+          <rect x="14" y="3" width="7" height="7" rx="1.5" />
+          <rect x="3" y="14" width="7" height="7" rx="1.5" />
+          <rect x="14" y="14" width="7" height="7" rx="1.5" />
+        </svg>
+        Catalogo <span>{{ prodotti.length }}</span>
+      </a>
     </nav>
     <button
       class="btn btn--primary header-add"
@@ -22,7 +28,8 @@
       (click)="apriNuovoProdotto()"
       aria-label="Aggiungi dispositivo"
     >
-      <span aria-hidden="true">＋</span> <span class="button-label">Aggiungi dispositivo</span>
+      <span aria-hidden="true">＋</span>
+      <span>Aggiungi<span class="desktop-label"> dispositivo</span></span>
     </button>
   </div>
 </header>
@@ -123,16 +130,30 @@
     </div>
     <div class="filter-panel">
       <div class="search-row">
-        <label class="search"
-          ><svg aria-hidden="true" viewBox="0 0 24 24">
+        <div class="search">
+          <svg aria-hidden="true" viewBox="0 0 24 24">
             <circle cx="10.5" cy="10.5" r="6.5" />
             <path d="m16 16 4 4" /></svg
           ><input
+            #searchInput
             type="search"
             [(ngModel)]="ricerca"
+            (keydown.escape)="ricerca = ''"
             placeholder="Cerca un modello, un marchio…"
-            aria-label="Cerca smartphone" /></label
-        ><label class="select-field"
+            aria-label="Cerca smartphone"
+          />
+          @if (ricerca) {
+            <button
+              class="search-clear"
+              type="button"
+              aria-label="Cancella ricerca"
+              (click)="ricerca = ''; searchInput.focus()"
+            >
+              ×
+            </button>
+          }
+        </div>
+        <label class="select-field"
           ><span>Disponibilità</span
           ><select [(ngModel)]="filtroDisponibilita">
             <option value="tutti">Tutti i dispositivi</option>
@@ -220,12 +241,12 @@
           <article
             class="card"
             [class.card--open]="gestioneId === prodotto.id"
+            [attr.data-brand]="marca(prodotto)"
             [attr.aria-label]="prodotto.nome"
           >
             <div class="product-media">
-              <span class="product-brand">{{ marca(prodotto) }}</span
-              ><span class="product-index">{{ (index + 1).toString().padStart(2, '0') }}</span
-              ><img
+              <span class="product-brand">{{ marca(prodotto) }}</span>
+              <img
                 [src]="prodotto.immagine"
                 [alt]="prodotto.nome + (scheda(prodotto) ? ' — ' + scheda(prodotto)?.colore : '')"
                 [attr.loading]="index < 4 ? 'eager' : 'lazy'"
@@ -237,8 +258,7 @@
             </div>
             <div class="card-body">
               <div class="model-category">
-                {{ scheda(prodotto)?.categoria || 'SMARTPHONE'
-                }}<span class="stock-dot" [class.stock-dot--out]="!prodotto.disponibile"></span>
+                {{ scheda(prodotto)?.categoria || 'SMARTPHONE' }}
               </div>
               <h3>{{ titolo(prodotto) }}</h3>
               <p class="device-spec">
@@ -254,28 +274,38 @@
                 }}</span>
               </div>
               @if (prezzoVerificato(prodotto)) {
-                <a
-                  class="source-link"
-                  [href]="scheda(prodotto)?.fonte"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  [attr.aria-label]="
-                    'Fonte del prezzo di ' + prodotto.nome + ': ' + scheda(prodotto)?.negozio
-                  "
-                  >{{ scheda(prodotto)?.negozio }} <span aria-hidden="true">↗</span
-                  ><span class="source-date">{{ dataVerifica }}</span></a
-                >
+                <div class="source-group">
+                  <a
+                    class="source-link"
+                    [href]="scheda(prodotto)?.fonte"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    [attr.aria-label]="
+                      'Fonte del prezzo di ' + prodotto.nome + ': ' + scheda(prodotto)?.negozio
+                    "
+                    ><span>Vedi su {{ scheda(prodotto)?.negozio }}</span>
+                    <span aria-hidden="true">↗</span></a
+                  >
+                  <span class="source-date">Verificato il {{ dataVerifica }}</span>
+                </div>
               } @else {
-                <div class="source-link source-link--custom">Prezzo impostato nell’inventario</div>
+                <div class="source-group">
+                  <div class="source-link source-link--custom">
+                    Prezzo impostato nell’inventario
+                  </div>
+                </div>
               }
               <div class="card-footer">
-                <span class="stock-label" [class.stock-label--out]="!prodotto.disponibile"
-                  >{{ prodotto.disponibile ? 'Disponibile' : 'Esaurito'
-                  }}<small
+                <div class="stock-summary">
+                  <span class="stock-label" [class.stock-label--out]="!prodotto.disponibile"
+                    ><span aria-hidden="true">{{ prodotto.disponibile ? '●' : '○' }}</span>
+                    {{ prodotto.disponibile ? 'Disponibile' : 'Esaurito' }}</span
+                  ><small
                     >{{ prodotto.quantita }}
                     {{ prodotto.quantita === 1 ? 'pezzo' : 'pezzi' }}</small
-                  ></span
-                ><button
+                  >
+                </div>
+                <button
                   class="manage-button"
                   type="button"
                   (click)="toggleGestione(prodotto)"
@@ -283,7 +313,12 @@
                   [attr.aria-controls]="'gestione-' + prodotto.id"
                   [attr.aria-label]="'Gestisci ' + prodotto.nome"
                 >
-                  {{ gestioneId === prodotto.id ? 'Chiudi' : 'Gestisci' }}
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 7h16M4 17h16" />
+                    <circle cx="9" cy="7" r="3" />
+                    <circle cx="15" cy="17" r="3" />
+                  </svg>
+                  {{ gestioneId === prodotto.id ? 'Chiudi gestione' : 'Gestisci' }}
                   <span aria-hidden="true">{{ gestioneId === prodotto.id ? '−' : '＋' }}</span>
                 </button>
               </div>
@@ -425,22 +460,6 @@
       </div>
     }
   </section>
-  <aside id="fonti" class="sources-note">
-    <span class="info-icon" aria-hidden="true">i</span>
-    <div>
-      <h2>Prezzi trasparenti, scelta consapevole.</h2>
-      <p>
-        Prezzi in euro, IVA inclusa, verificati l’8 settembre 2026 per la configurazione indicata.
-        Ogni scheda distingue il prezzo del negozio dal listino ufficiale e rimanda alla fonte. Le
-        offerte possono cambiare; eventuali spese di spedizione sono escluse.
-      </p>
-      <p class="demo-note">
-        DeviceHub è un inventario dimostrativo: quantità e disponibilità della demo non
-        rappresentano le scorte dei rivenditori.
-      </p>
-    </div>
-    <span class="sources-badge">FONTI CONSULTABILI ↗</span>
-  </aside>
 </main>
 <footer class="site-footer">
   <a class="footer-brand" href="#">DeviceHub<span>.</span></a>
