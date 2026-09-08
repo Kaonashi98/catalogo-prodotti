@@ -1,204 +1,564 @@
-<div class="page">
-
-  @if (errorMessage) {
-    <div class="notice notice--error" role="alert">{{ errorMessage }}</div>
-  }
-
-  @if (successMessage) {
-    <div class="notice notice--success" [class.notice--fade]="isSuccessFading" role="status">
-      {{ successMessage }}
+<a class="skip-link" href="#catalogo">Vai al catalogo</a>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="#" aria-label="DeviceHub, inizio pagina">
+      <img
+        class="brand-image"
+        src="/devicehub-logo.png"
+        alt="DeviceHub - Inventario digitale per dispositivi tech"
+        width="759"
+        height="649"
+        fetchpriority="high"
+      />
+    </a>
+    <nav aria-label="Navigazione principale">
+      <a href="#catalogo" class="nav-active"
+        >Catalogo <span>{{ prodotti.length }}</span></a
+      ><a href="#fonti">Prezzi e fonti</a>
+    </nav>
+    <button
+      class="btn btn--primary header-add"
+      type="button"
+      (click)="apriNuovoProdotto()"
+      aria-label="Aggiungi dispositivo"
+    >
+      <span aria-hidden="true">＋</span> <span class="button-label">Aggiungi dispositivo</span>
+    </button>
+  </div>
+</header>
+@if (errorMessage) {
+  <div class="notice notice--error" role="alert">
+    {{ errorMessage }}
+    <button type="button" (click)="errorMessage = ''" aria-label="Chiudi errore">×</button>
+  </div>
+}
+@if (successMessage) {
+  <div class="notice notice--success" [class.notice--fade]="isSuccessFading" role="status">
+    <span aria-hidden="true">✓</span> {{ successMessage }}
+  </div>
+}
+<main class="workspace">
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-copy">
+      <p class="eyebrow"><span class="tiny-dot"></span> LA SELEZIONE · SETTEMBRE 2026</p>
+      <h1 id="hero-title">
+        <span class="sr-only">DeviceHub. </span>Il tuo prossimo<br /><em>upgrade.</em>
+      </h1>
+      <p class="hero-description">
+        I nuovi protagonisti del mondo smartphone.<br />Scopri i modelli, esplora i prezzi, trova il
+        tuo.
+      </p>
+      <a class="btn btn--dark" href="#catalogo"
+        >Esplora il catalogo <span aria-hidden="true">↘</span></a
+      >
+      <div class="hero-note">
+        <span aria-hidden="true">✓</span> Modelli reali. Prezzi con una fonte.
+      </div>
     </div>
-  }
-
-  <main class="workspace">
-    <div class="panel-brand" aria-label="DeviceHub">
-      <img class="panel-brand__image" src="/devicehub-logo.png" alt="DeviceHub - Inventario digitale per dispositivi tech">
-      <h1 class="sr-only">DeviceHub</h1>
+    <div class="hero-visual" aria-label="Smartphone di ultima generazione">
+      <div class="orbit"></div>
+      <div class="orbit orbit--two"></div>
+      <span class="visual-label">LA TECNOLOGIA, A MODO TUO.</span
+      ><img
+        class="hero-phone hero-phone--back"
+        src="/images/phones/pixel-11-pro.webp"
+        alt="Google Pixel 11 Pro verde oliva"
+        fetchpriority="high"
+        width="320"
+        height="400"
+      /><img
+        class="hero-phone hero-phone--front"
+        src="/images/phones/iphone-17-pro.webp"
+        alt="iPhone 17 Pro arancione cosmico"
+        fetchpriority="high"
+        width="320"
+        height="400"
+      />
+      <div class="visual-caption">
+        <span aria-hidden="true">✳</span>
+        <div>Nuove prospettive.<small>La tecnologia incontra il tuo stile.</small></div>
+      </div>
+      <span class="visual-number" aria-hidden="true">/ 2026</span>
     </div>
-    <div class="stats" aria-label="Statistiche catalogo">
-      <div class="stat">
-        <span class="stat__value">{{ prodotti.length }}</span>
-        <span class="stat__label">dispositivi totali</span>
-      </div>
-      <div class="stat stat--ok">
-        <span class="stat__value">{{ prodottiDisponibili }}</span>
-        <span class="stat__label">dispositivi disponibili</span>
-      </div>
-      <div class="stat stat--stock">
-        <span class="stat__value">{{ pezziTotali }}</span>
-        <span class="stat__label">scorte totali</span>
-      </div>
-      <div class="stat stat--out">
-        <span class="stat__value">{{ prodottiEsauriti }}</span>
-        <span class="stat__label">dispositivi esauriti</span>
+  </section>
+  <section class="overview" aria-label="Statistiche inventario dimostrativo">
+    <div class="overview-intro">
+      <span aria-hidden="true">▦</span>
+      <div>
+        Il catalogo, a colpo d’occhio<small>Il tuo inventario digitale, sempre in ordine.</small>
       </div>
     </div>
-
-
-    <section class="panel add-panel" aria-labelledby="add-product-title">
-      <p class="section-kicker">Nuovo dispositivo</p>
-      <h2 id="add-product-title" class="panel__title">Aggiungi dispositivo</h2>
-
-      <div class="form">
-        <label class="field">
-          <span class="field__label">Nome dispositivo</span>
-          <input class="field__control" type="text" [(ngModel)]="nuovoNome" (ngModelChange)="pulisciErroreNuovoProdotto('nome')" placeholder="Es. iPhone 15, Galaxy Watch, iPad" autocomplete="off" required>
-          @if (nuovoProdottoErrors.nome) {
-            <span class="field__error" role="alert">{{ nuovoProdottoErrors.nome }}</span>
-          }
-        </label>
-
-        <label class="field">
-          <span class="field__label">Prezzo</span>
-          <input class="field__control" type="number" [(ngModel)]="nuovoPrezzo" (ngModelChange)="pulisciErroreNuovoProdotto('prezzo')" placeholder="0" min="1" [disabled]="!nuovoNomeValido" required>
-          @if (nuovoProdottoErrors.prezzo) {
-            <span class="field__error" role="alert">{{ nuovoProdottoErrors.prezzo }}</span>
-          }
-        </label>
-
-        <label class="field">
-          <span class="field__label">Quantità iniziale</span>
-          <input class="field__control" type="number" [(ngModel)]="nuovaQuantita" (ngModelChange)="pulisciErroreNuovoProdotto('quantita')" placeholder="1" min="0" [disabled]="!nuovoPrezzoValido" required>
-          @if (nuovoProdottoErrors.quantita) {
-            <span class="field__error" role="alert">{{ nuovoProdottoErrors.quantita }}</span>
-          }
-        </label>
-
-        <label class="field field--file">
-          <span class="field__label">Immagine dispositivo</span>
-          <input #nuovaImmagineInput class="field__control field__control--file" type="file" accept="image/*" (change)="selezionaImmagine($event)" [disabled]="!nuovaQuantitaValida" required>
-          <span class="field__helper">Carica una foto reale e specifica del dispositivo che stai aggiungendo.</span>
-          @if (nuovoProdottoErrors.immagine) {
-            <span class="field__error" role="alert">{{ nuovoProdottoErrors.immagine }}</span>
-          }
-        </label>
-
-        @if (nuovaImmaginePreview) {
-          <div class="image-preview" aria-label="Anteprima immagine selezionata">
-            <img [src]="nuovaImmaginePreview" alt="Anteprima dispositivo">
-            <button class="btn btn--ghost" type="button" (click)="rimuoviImmagineSelezionata()">Rimuovi</button>
+    <div class="stat">
+      <strong>{{ prodotti.length }}</strong
+      ><span>Modelli</span>
+    </div>
+    <div class="stat">
+      <strong>{{ marche.length }}</strong
+      ><span>Marchi</span>
+    </div>
+    <div class="stat">
+      <strong>{{ prodottiDisponibili }}</strong
+      ><span>Disponibili nella demo</span>
+    </div>
+    <div class="stat">
+      <strong>{{ pezziTotali }}</strong
+      ><span>Pezzi in inventario</span>
+    </div>
+  </section>
+  <section id="catalogo" class="catalog-panel" aria-labelledby="product-list-title">
+    <div class="catalog-heading">
+      <div>
+        <p class="eyebrow">TROVA QUELLO CHE FA PER TE</p>
+        <h2 id="product-list-title">Esplora gli smartphone<span>.</span></h2>
+      </div>
+      <button
+        class="btn btn--ghost refresh"
+        type="button"
+        (click)="caricaDati()"
+        [disabled]="isLoading"
+        aria-label="Aggiorna catalogo"
+      >
+        <span aria-hidden="true">↻</span><span class="button-label">Aggiorna</span>
+      </button>
+    </div>
+    <div class="filter-panel">
+      <div class="search-row">
+        <label class="search"
+          ><svg aria-hidden="true" viewBox="0 0 24 24">
+            <circle cx="10.5" cy="10.5" r="6.5" />
+            <path d="m16 16 4 4" /></svg
+          ><input
+            type="search"
+            [(ngModel)]="ricerca"
+            placeholder="Cerca un modello, un marchio…"
+            aria-label="Cerca smartphone" /></label
+        ><label class="select-field"
+          ><span>Disponibilità</span
+          ><select [(ngModel)]="filtroDisponibilita">
+            <option value="tutti">Tutti i dispositivi</option>
+            <option value="disponibili">Disponibili</option>
+            <option value="esauriti">Esauriti</option>
+          </select></label
+        >
+      </div>
+      <div class="brand-filters" aria-label="Filtra per marchio">
+        <button
+          type="button"
+          [class.active]="marcaSelezionata === 'Tutti'"
+          [attr.aria-pressed]="marcaSelezionata === 'Tutti'"
+          (click)="marcaSelezionata = 'Tutti'"
+        >
+          Tutti <span>{{ prodotti.length }}</span>
+        </button>
+        @for (brand of marche; track brand) {
+          <button
+            type="button"
+            [class.active]="marcaSelezionata === brand"
+            [attr.aria-pressed]="marcaSelezionata === brand"
+            (click)="marcaSelezionata = brand"
+          >
+            {{ brand }} <span>{{ contaMarca(brand) }}</span>
+          </button>
+        }
+      </div>
+    </div>
+    <div class="results-bar">
+      <p role="status" aria-live="polite">
+        <strong>{{ prodottiFiltrati.length }}</strong> smartphone
+        @if (filtriAttivi) {
+          su {{ prodotti.length }}
+          <button class="text-button" type="button" (click)="resetFiltri()">Azzera filtri ×</button>
+        } @else {
+          <span>nella nostra selezione</span>
+        }
+      </p>
+      <label
+        ><span>Ordina per</span
+        ><select [(ngModel)]="ordinamento" aria-label="Ordina smartphone">
+          <option value="selezione">La nostra selezione</option>
+          <option value="prezzo-asc">Prezzo crescente</option>
+          <option value="prezzo-desc">Prezzo decrescente</option>
+          <option value="nome">Nome A–Z</option>
+        </select></label
+      >
+    </div>
+    @if (isLoading) {
+      <div class="grid" aria-label="Caricamento smartphone" aria-busy="true">
+        @for (item of [1, 2, 3, 4]; track item) {
+          <div class="skeleton-card">
+            <div></div>
+            <span></span><span></span>
           </div>
         }
-
-        <button class="btn btn--primary btn--wide" type="button" (click)="aggiungiProdotto()" [disabled]="isSaving || isProcessingImage">
-          {{ isSaving ? 'Salvataggio...' : isProcessingImage ? 'Preparazione immagine...' : 'Aggiungi al catalogo' }}
-        </button>
       </div>
-    </section>
-
-    <section class="catalog-panel" aria-labelledby="product-list-title">
-      <div class="catalog__head">
-        <div>
-          <p class="section-kicker">Inventario</p>
-          <h2 id="product-list-title" class="catalog__title">Dispositivi in catalogo</h2>
-        </div>
-        <button class="btn btn--ghost" type="button" (click)="caricaDati()">Aggiorna</button>
+    } @else if (prodottiFiltrati.length === 0) {
+      <div class="empty">
+        <span aria-hidden="true">⌕</span>
+        <h3>{{ errorMessage ? 'Il catalogo non è disponibile' : 'Nessun dispositivo trovato' }}</h3>
+        <p>
+          {{
+            filtriAttivi
+              ? 'Prova un altro modello o modifica i filtri.'
+              : errorMessage
+                ? 'Controlla la connessione e riprova.'
+                : 'Il tuo catalogo è pronto per il primo smartphone.'
+          }}
+        </p>
+        @if (filtriAttivi) {
+          <button class="btn btn--primary" (click)="resetFiltri()">Azzera filtri</button>
+        } @else if (errorMessage) {
+          <button class="btn btn--primary" (click)="caricaDati()">Riprova</button>
+        } @else {
+          <button class="btn btn--primary" (click)="apriNuovoProdotto()">
+            Aggiungi dispositivo
+          </button>
+        }
       </div>
-
-      @if (isLoading) {
-        <div class="empty">
-          <p class="empty__title">Caricamento dispositivi...</p>
-        </div>
-      } @else if (prodotti.length === 0) {
-        <div class="empty">
-          <p class="empty__title">Nessun dispositivo trovato.</p>
-          <p class="empty__hint">Aggiungi il primo dispositivo al catalogo.</p>
-        </div>
-      } @else {
-        <div class="grid">
-          @for (prodotto of prodotti; track prodotto.id) {
-            <article class="card">
-              @if (editingId === prodotto.id) {
-                <div class="card__top">
-                  <div>
-                    <p class="card__meta">ID {{ prodotto.id }}</p>
-                    <h3 class="card__title">Modifica dispositivo</h3>
-                  </div>
-                  <span class="pill pill--editing">In modifica</span>
-                </div>
-
-                <div class="edit-form">
-                  <label class="field">
-                    <span class="field__label">Nome dispositivo</span>
-                    <input class="field__control" type="text" [(ngModel)]="editNome" placeholder="Nome dispositivo">
-                  </label>
-
-                  <label class="field">
-                    <span class="field__label">Prezzo</span>
-                    <input class="field__control" type="number" [(ngModel)]="editPrezzo" placeholder="0" min="1">
-                  </label>
-
-                  <label class="field">
-                    <span class="field__label">Quantità</span>
-                    <input class="field__control" type="number" [(ngModel)]="editQuantita" placeholder="0" min="0">
-                  </label>
-
-                  <label class="check">
-                    <input class="check__box" type="checkbox" [(ngModel)]="editDisponibile">
-                    <span>Disponibile</span>
-                  </label>
-                </div>
-
-                <div class="card__actions card__actions--edit">
-                  <button class="btn btn--primary" type="button" (click)="salvaModifica()" [disabled]="isSaving">Salva</button>
-                  <button class="btn btn--ghost" type="button" (click)="annullaModifica()">Annulla</button>
-                </div>
+    } @else {
+      <div class="grid">
+        @for (prodotto of prodottiFiltrati; track prodotto.id; let index = $index) {
+          <article
+            class="card"
+            [class.card--open]="gestioneId === prodotto.id"
+            [attr.aria-label]="prodotto.nome"
+          >
+            <div class="product-media">
+              <span class="product-brand">{{ marca(prodotto) }}</span
+              ><span class="product-index">{{ (index + 1).toString().padStart(2, '0') }}</span
+              ><img
+                [src]="prodotto.immagine"
+                [alt]="prodotto.nome + (scheda(prodotto) ? ' — ' + scheda(prodotto)?.colore : '')"
+                [attr.loading]="index < 4 ? 'eager' : 'lazy'"
+                decoding="async"
+                width="480"
+                height="400"
+                (error)="usaImmagineFallback(prodotto)"
+              />
+            </div>
+            <div class="card-body">
+              <div class="model-category">
+                {{ scheda(prodotto)?.categoria || 'SMARTPHONE'
+                }}<span class="stock-dot" [class.stock-dot--out]="!prodotto.disponibile"></span>
+              </div>
+              <h3>{{ titolo(prodotto) }}</h3>
+              <p class="device-spec">
+                {{ scheda(prodotto)?.memoria || 'Configurazione personalizzata' }}
+                @if (scheda(prodotto)) {
+                  <span>·</span> {{ scheda(prodotto)?.colore }}
+                }
+              </p>
+              <div class="price">
+                <strong>{{ formattaPrezzo(prodotto.prezzo) }}</strong
+                ><span>{{
+                  prezzoVerificato(prodotto) ? scheda(prodotto)?.tipoPrezzo : 'Prezzo inventario'
+                }}</span>
+              </div>
+              @if (prezzoVerificato(prodotto)) {
+                <a
+                  class="source-link"
+                  [href]="scheda(prodotto)?.fonte"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  [attr.aria-label]="
+                    'Fonte del prezzo di ' + prodotto.nome + ': ' + scheda(prodotto)?.negozio
+                  "
+                  >{{ scheda(prodotto)?.negozio }} <span aria-hidden="true">↗</span
+                  ><span class="source-date">{{ dataVerifica }}</span></a
+                >
               } @else {
-                <div class="card__top">
-                  <figure class="product-media">
-                    <img [src]="prodotto.immagine" [alt]="prodotto.nome" title="prodotto.nome" loading="lazy" (error)="usaImmagineFallback(prodotto)">
-                  </figure>
-                  <span class="pill" [class.pill--ok]="prodotto.disponibile" [class.pill--out]="!prodotto.disponibile">
-                    {{ prodotto.disponibile ? 'Disponibile' : 'Esaurito' }}
-                  </span>
-                </div>
-
-                <h3 class="card__title">{{ prodotto.nome }}</h3>
-                <p class="card__meta">Codice dispositivo {{ prodotto.id }}</p>
-
-                <div class="price-row">
-                  <span>Prezzo</span>
-                  <strong>{{ prodotto.prezzo | currency:'EUR' }}</strong>
-                </div>
-
-                <div class="stock-control" aria-label="Quantità disponibile">
-                  <span class="stock-control__label">Quantità</span>
-                  <div class="stepper">
-                    <button class="stepper__btn" type="button" (click)="diminuisciQuantita(prodotto)" aria-label="Diminuisci quantità">-</button>
-                    <input
-                      class="stepper__input"
-                      type="number"
-                      min="0"
-                      [ngModel]="prodotto.quantita"
-                      (ngModelChange)="aggiornaQuantita(prodotto, $event)"
-                      aria-label="Quantità dispositivo"
+                <div class="source-link source-link--custom">Prezzo impostato nell’inventario</div>
+              }
+              <div class="card-footer">
+                <span class="stock-label" [class.stock-label--out]="!prodotto.disponibile"
+                  >{{ prodotto.disponibile ? 'Disponibile' : 'Esaurito'
+                  }}<small
+                    >{{ prodotto.quantita }}
+                    {{ prodotto.quantita === 1 ? 'pezzo' : 'pezzi' }}</small
+                  ></span
+                ><button
+                  class="manage-button"
+                  type="button"
+                  (click)="toggleGestione(prodotto)"
+                  [attr.aria-expanded]="gestioneId === prodotto.id"
+                  [attr.aria-controls]="'gestione-' + prodotto.id"
+                  [attr.aria-label]="'Gestisci ' + prodotto.nome"
+                >
+                  {{ gestioneId === prodotto.id ? 'Chiudi' : 'Gestisci' }}
+                  <span aria-hidden="true">{{ gestioneId === prodotto.id ? '−' : '＋' }}</span>
+                </button>
+              </div>
+            </div>
+            @if (gestioneId === prodotto.id) {
+              <div class="management" [id]="'gestione-' + prodotto.id">
+                @if (editingId === prodotto.id) {
+                  <form class="edit-form" (ngSubmit)="salvaModifica()">
+                    <h4>Modifica dispositivo</h4>
+                    <label class="field"
+                      ><span>Nome dispositivo</span
+                      ><input name="editNome" type="text" [(ngModel)]="editNome" required
+                    /></label>
+                    <div class="form-row">
+                      <label class="field"
+                        ><span>Prezzo (€)</span
+                        ><input
+                          name="editPrezzo"
+                          type="number"
+                          min="0.01"
+                          step="0.01"
+                          [(ngModel)]="editPrezzo"
+                          required /></label
+                      ><label class="field"
+                        ><span>Quantità</span
+                        ><input
+                          name="editQuantita"
+                          type="number"
+                          min="0"
+                          step="1"
+                          [(ngModel)]="editQuantita"
+                          required
+                      /></label>
+                    </div>
+                    <label class="check"
+                      ><input
+                        name="editDisponibile"
+                        type="checkbox"
+                        [(ngModel)]="editDisponibile"
+                      />
+                      Disponibile</label
                     >
-                    <button class="stepper__btn" type="button" (click)="aumentaQuantita(prodotto)" aria-label="Aumenta quantità">+</button>
-                  </div>
-                </div>
-
-                @if (pendingDeleteId === prodotto.id) {
-                  <div class="confirm-box" role="alert">
-                    <span>Confermi l'eliminazione?</span>
-                    <div class="confirm-box__actions">
-                      <button class="btn btn--danger" type="button" (click)="eliminaProdotto(prodotto.id)">Elimina</button>
-                      <button class="btn btn--ghost" type="button" (click)="annullaEliminazione()">Annulla</button>
+                    <div class="action-row">
+                      <button class="btn btn--primary" type="submit" [disabled]="isSaving">
+                        {{ isSaving ? 'Salvataggio…' : 'Salva' }}</button
+                      ><button
+                        class="btn btn--ghost"
+                        type="button"
+                        (click)="annullaModifica()"
+                        [disabled]="isSaving"
+                      >
+                        Annulla
+                      </button>
+                    </div>
+                  </form>
+                } @else {
+                  <div class="stock-control">
+                    <span>Quantità nella demo</span>
+                    <div class="stepper">
+                      <button
+                        type="button"
+                        (click)="diminuisciQuantita(prodotto)"
+                        [disabled]="prodotto.quantita === 0 || pendingIds.has(prodotto.id)"
+                        [attr.aria-label]="'Diminuisci quantità di ' + prodotto.nome"
+                      >
+                        −</button
+                      ><input
+                        type="number"
+                        min="0"
+                        step="1"
+                        [ngModel]="prodotto.quantita"
+                        (change)="aggiornaQuantita(prodotto, +$any($event.target).value)"
+                        [disabled]="pendingIds.has(prodotto.id)"
+                        [attr.aria-label]="'Quantità di ' + prodotto.nome"
+                      /><button
+                        type="button"
+                        (click)="aumentaQuantita(prodotto)"
+                        [disabled]="pendingIds.has(prodotto.id)"
+                        [attr.aria-label]="'Aumenta quantità di ' + prodotto.nome"
+                      >
+                        ＋
+                      </button>
                     </div>
                   </div>
-                } @else {
-                  <div class="card__actions">
-                    <button class="btn btn--state" type="button" (click)="toggleDisponibile(prodotto)">
-                      {{ prodotto.disponibile ? 'Segna esaurito' : 'Rendi disponibile' }}
-                    </button>
-                    <button class="btn btn--edit" type="button" (click)="iniziaModifica(prodotto)">Modifica</button>
-                    <button class="btn btn--danger" type="button" (click)="richiediEliminazione(prodotto.id)">Elimina</button>
-                  </div>
+                  <button
+                    class="availability-button"
+                    type="button"
+                    (click)="toggleDisponibile(prodotto)"
+                    [disabled]="pendingIds.has(prodotto.id)"
+                  >
+                    {{ prodotto.disponibile ? 'Segna come esaurito' : 'Rendi disponibile' }}
+                    <span aria-hidden="true">⇄</span>
+                  </button>
+                  @if (pendingDeleteId === prodotto.id) {
+                    <div class="confirm-box" role="alert">
+                      <p>Eliminare {{ titolo(prodotto) }} dal catalogo?</p>
+                      <div class="action-row">
+                        <button
+                          class="btn btn--danger"
+                          type="button"
+                          (click)="eliminaProdotto(prodotto.id)"
+                          [disabled]="pendingIds.has(prodotto.id)"
+                        >
+                          Conferma eliminazione</button
+                        ><button
+                          class="btn btn--ghost"
+                          type="button"
+                          (click)="annullaEliminazione()"
+                          [disabled]="pendingIds.has(prodotto.id)"
+                        >
+                          Annulla
+                        </button>
+                      </div>
+                    </div>
+                  } @else {
+                    <div class="action-row">
+                      <button
+                        class="btn btn--ghost"
+                        type="button"
+                        (click)="iniziaModifica(prodotto)"
+                        [disabled]="pendingIds.has(prodotto.id)"
+                      >
+                        Modifica</button
+                      ><button
+                        class="btn btn--danger-text"
+                        type="button"
+                        (click)="richiediEliminazione(prodotto.id)"
+                        [disabled]="pendingIds.has(prodotto.id)"
+                      >
+                        Elimina
+                      </button>
+                    </div>
+                  }
                 }
-              }
-            </article>
-          }
-        </div>
+              </div>
+            }
+          </article>
+        }
+      </div>
+    }
+  </section>
+  <aside id="fonti" class="sources-note">
+    <span class="info-icon" aria-hidden="true">i</span>
+    <div>
+      <h2>Prezzi trasparenti, scelta consapevole.</h2>
+      <p>
+        Prezzi in euro, IVA inclusa, verificati l’8 settembre 2026 per la configurazione indicata.
+        Ogni scheda distingue il prezzo del negozio dal listino ufficiale e rimanda alla fonte. Le
+        offerte possono cambiare; eventuali spese di spedizione sono escluse.
+      </p>
+      <p class="demo-note">
+        DeviceHub è un inventario dimostrativo: quantità e disponibilità della demo non
+        rappresentano le scorte dei rivenditori.
+      </p>
+    </div>
+    <span class="sources-badge">FONTI CONSULTABILI ↗</span>
+  </aside>
+</main>
+<footer class="site-footer">
+  <a class="footer-brand" href="#">DeviceHub<span>.</span></a>
+  <p>La tecnologia giusta, tutta in un posto.</p>
+  <span>CATALOGO SMARTPHONE · 2026</span>
+</footer>
+<dialog
+  #addDialog
+  class="add-dialog"
+  aria-labelledby="add-product-title"
+  (cancel)="isSaving && $event.preventDefault()"
+>
+  <div class="dialog-header">
+    <div>
+      <p class="eyebrow">AMPLIA IL TUO INVENTARIO</p>
+      <h2 id="add-product-title">Aggiungi dispositivo</h2>
+    </div>
+    <button
+      class="close-button"
+      type="button"
+      (click)="chiudiNuovoProdotto()"
+      [disabled]="isSaving"
+      aria-label="Chiudi aggiunta dispositivo"
+    >
+      ×
+    </button>
+  </div>
+  <form class="add-form" (ngSubmit)="aggiungiProdotto()" novalidate>
+    <label class="field"
+      ><span>Nome dispositivo</span
+      ><input
+        name="nuovoNome"
+        type="text"
+        [(ngModel)]="nuovoNome"
+        (ngModelChange)="pulisciErroreNuovoProdotto('nome')"
+        placeholder="Es. Samsung Galaxy S26"
+        autocomplete="off"
+        required
+        autofocus
+      />
+      @if (nuovoProdottoErrors.nome) {
+        <small class="field-error" role="alert">{{ nuovoProdottoErrors.nome }}</small>
       }
-    </section>
-  </main>
-</div>
+    </label>
+    <div class="form-row">
+      <label class="field"
+        ><span>Prezzo (€)</span
+        ><input
+          name="nuovoPrezzo"
+          type="number"
+          [(ngModel)]="nuovoPrezzo"
+          (ngModelChange)="pulisciErroreNuovoProdotto('prezzo')"
+          placeholder="0,00"
+          min="0.01"
+          step="0.01"
+          required
+        />
+        @if (nuovoProdottoErrors.prezzo) {
+          <small class="field-error" role="alert">{{ nuovoProdottoErrors.prezzo }}</small>
+        }</label
+      ><label class="field"
+        ><span>Quantità iniziale</span
+        ><input
+          name="nuovaQuantita"
+          type="number"
+          [(ngModel)]="nuovaQuantita"
+          (ngModelChange)="pulisciErroreNuovoProdotto('quantita')"
+          placeholder="0"
+          min="0"
+          step="1"
+          required
+        />
+        @if (nuovoProdottoErrors.quantita) {
+          <small class="field-error" role="alert">{{ nuovoProdottoErrors.quantita }}</small>
+        }
+      </label>
+    </div>
+    <label class="field upload-field"
+      ><span>Foto del dispositivo</span><span class="upload-symbol" aria-hidden="true">↑</span
+      ><strong>Scegli una foto reale</strong><small>PNG, JPG o WebP · massimo 4 MB</small
+      ><input
+        #nuovaImmagineInput
+        name="immagine"
+        type="file"
+        accept="image/png,image/jpeg,image/webp"
+        (change)="selezionaImmagine($event)"
+      />
+      @if (nuovoProdottoErrors.immagine) {
+        <small class="field-error" role="alert">{{ nuovoProdottoErrors.immagine }}</small>
+      }
+    </label>
+    @if (nuovaImmaginePreview) {
+      <div class="image-preview">
+        <img [src]="nuovaImmaginePreview" alt="Anteprima del nuovo dispositivo" /><button
+          class="text-button"
+          type="button"
+          (click)="rimuoviImmagineSelezionata()"
+        >
+          Rimuovi immagine
+        </button>
+      </div>
+    }
+    @if (errorMessage) {
+      <p class="field-error" role="alert">{{ errorMessage }}</p>
+    }
+    <button
+      class="btn btn--primary btn--wide"
+      type="submit"
+      [disabled]="isSaving || isProcessingImage"
+    >
+      {{
+        isSaving
+          ? 'Salvataggio…'
+          : isProcessingImage
+            ? 'Preparazione immagine…'
+            : 'Aggiungi al catalogo'
+      }}
+      <span aria-hidden="true">＋</span>
+    </button>
+  </form>
+</dialog>

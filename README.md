@@ -6,6 +6,10 @@ Demo online: [catalogo-prodotti.vercel.app](https://catalogo-prodotti.vercel.app
 
 ## Funzionalità
 
+- Selezione di 20 smartphone recenti di Apple, Samsung, Google, OPPO, realme e Xiaomi, aggiornata all'8 settembre 2026.
+- Prezzi reali per configurazione e colore, con data di verifica e link alla fonte su ogni scheda: [dettaglio delle fonti](docs/catalogo-2026-09-08.md).
+- Fotografie originali ottimizzate in WebP e incluse nell'app, con immagine neutra in caso di errore.
+- Ricerca per modello, marca e memoria, filtri combinabili e ordinamento per prezzo o nome.
 - Visualizzazione dei dispositivi con prezzo, immagine, quantità e stato di disponibilità.
 - Aggiunta di nuovi dispositivi tramite form controllato.
 - Caricamento immagine dal computer con anteprima e compressione prima del salvataggio.
@@ -16,6 +20,10 @@ Demo online: [catalogo-prodotti.vercel.app](https://catalogo-prodotti.vercel.app
 - Messaggi di errore e successo direttamente nella pagina.
 - Dati salvati online tramite Supabase e API REST.
 - Layout responsive pubblicato su Vercel.
+
+Quantità e disponibilità appartengono all'inventario dimostrativo: non sono le scorte dei negozi citati. I prezzi sono una rilevazione datata, non un aggiornamento automatico. Se un prezzo viene modificato nell'inventario, la scheda smette di presentarlo come verificato.
+
+Il logo e la favicon sono gli asset originali del progetto. La pubblicazione su Vercel segue il ramo `main` del repository collegato.
 
 ## Stack
 

@@ -1,7 +1,16 @@
-import { ChangeDetectorRef, Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  inject,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import catalogoVerificato from './catalogo-verificato.json';
 
 type Prodotto = {
   id: string;
@@ -23,54 +32,17 @@ type NuovoProdottoFormErrors = {
 
 const SUPABASE_API_URL = 'https://cmpjcuwijckpdgfdkuat.supabase.co/rest/v1/prodotti';
 const SUPABASE_PUBLIC_KEY = 'sb_publishable_L3PkG0FllnfMqrW8mYUAew_V4yGv742';
-const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=520&q=80';
-
-
-const ORDINE_PRODOTTI_INIZIALI: Record<string, number> = {
-  '1': 1,
-  '2': 2,
-  '3': 3,
-  '4': 4,
-  '5': 5,
-  '6': 6,
-  '7': 7,
-  '8': 8,
-  '9': 9,
-  '10': 10,
-  acde: 11,
-  '2968': 12,
-  f022: 13,
-  '2269': 14,
-  zfl6: 15
-};
-const IMMAGINI_PRODOTTO: Record<string, string> = {
-  'galaxy s22 ultra': 'https://fdn2.gsmarena.com/vv/bigpic/samsung-galaxy-s22-ultra-5g.jpg',
-  'galaxy s23 ultra': 'https://fdn2.gsmarena.com/vv/bigpic/samsung-galaxy-s23-ultra-5g.jpg',
-  'iphone 14 pro': 'https://fdn2.gsmarena.com/vv/bigpic/apple-iphone-14-pro.jpg',
-  'pixel 6': 'https://fdn2.gsmarena.com/vv/bigpic/google-pixel-6.jpg',
-  'oneplus 10 pro': 'https://fdn2.gsmarena.com/vv/bigpic/oneplus-10-pro.jpg',
-  'xperia 1 iii': 'https://fdn2.gsmarena.com/vv/bigpic/sony-xperia-1-iii.jpg',
-  'moto g power 2022': 'https://p4-ofp.static.pub//fes/cms/2024/11/15/qlbq5a3q9e3t7uzw0ptg6kspws1dga729330.jpg',
-  'moto g power': 'https://p4-ofp.static.pub//fes/cms/2024/11/15/qlbq5a3q9e3t7uzw0ptg6kspws1dga729330.jpg',
-  'nokia xr20': 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Nokia_XR20-front_PNr%C2%B01006.jpg/250px-Nokia_XR20-front_PNr%C2%B01006.jpg',
-  'asus rog phone 5': 'https://fdn2.gsmarena.com/vv/bigpic/asus-rog-phone-5.jpg',
-  'lg velvet': 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/LG_Velvet_Aurora_Green_version.jpg/250px-LG_Velvet_Aurora_Green_version.jpg',
-  'htc u12+': 'https://fdn2.gsmarena.com/vv/bigpic/htc-u12-plus-.jpg',
-  'iphone 15': 'https://fdn2.gsmarena.com/vv/bigpic/apple-iphone-15.jpg',
-  'iphone 15 pro': 'https://fdn2.gsmarena.com/vv/bigpic/apple-iphone-15-pro.jpg',
-  'galaxy s25 ultra': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/%E7%AC%AC%E4%B8%80%E6%89%8B%EF%BC%81Samsung_Galaxy_S25%E7%B3%BB%E5%88%97%E6%8B%BF%E5%88%B0%E4%BA%86%EF%BC%9A5%E4%B8%AA%E5%8D%87%E7%BA%A7%EF%BC%81S_Pen%E4%B8%8D%E6%94%AF%E6%8C%81%E8%93%9D%E7%89%99%E4%BA%86%EF%BC%9F_%282160p_50fps_VP9-96kbit_AAC%29-00.06.03.789.png/250px-%E7%AC%AC%E4%B8%80%E6%89%8B%EF%BC%81Samsung_Galaxy_S25%E7%B3%BB%E5%88%97%E6%8B%BF%E5%88%B0%E4%BA%86%EF%BC%9A5%E4%B8%AA%E5%8D%87%E7%BA%A7%EF%BC%81S_Pen%E4%B8%8D%E6%94%AF%E6%8C%81%E8%93%9D%E7%89%99%E4%BA%86%EF%BC%9F_%282160p_50fps_VP9-96kbit_AAC%29-00.06.03.789.png',
-  'google pixel 9 pro xl': 'https://fdn2.gsmarena.com/vv/bigpic/google-pixel-9-pro-xl-.jpg',
-  'galaxy z flip6': 'https://fdn2.gsmarena.com/vv/bigpic/samsung-galaxy-z-flip6.jpg'
-};
+const FALLBACK_IMAGE = '/images/immagine-non-disponibile.svg';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './app.html',
-  styleUrls: ['./app.scss']
+  styleUrls: ['./app.scss'],
 })
 export class AppComponent implements OnInit, OnDestroy {
+  @ViewChild('addDialog') private addDialog?: ElementRef<HTMLDialogElement>;
   @ViewChild('nuovaImmagineInput') private nuovaImmagineInput?: ElementRef<HTMLInputElement>;
 
   private readonly http = inject(HttpClient);
@@ -79,10 +51,119 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly supabaseHeaders = new HttpHeaders({
     apikey: SUPABASE_PUBLIC_KEY,
     Authorization: `Bearer ${SUPABASE_PUBLIC_KEY}`,
-    Prefer: 'return=representation'
+    Prefer: 'return=representation',
   });
 
   prodotti: Prodotto[] = [];
+  ricerca = '';
+  marcaSelezionata = 'Tutti';
+  filtroDisponibilita = 'tutti';
+  ordinamento = 'selezione';
+  gestioneId: string | null = null;
+  readonly pendingIds = new Set<string>();
+  readonly dataVerifica = '08/09/2026';
+  readonly formatiEuro = new Intl.NumberFormat('it-IT', {
+    style: 'currency',
+    currency: 'EUR',
+    useGrouping: true,
+  });
+
+  formattaPrezzo(prezzo: number): string {
+    return this.formatiEuro.format(prezzo);
+  }
+
+  scheda(prodotto: Prodotto) {
+    return catalogoVerificato.find(
+      (item) => item.nome.toLowerCase() === prodotto.nome.toLowerCase().trim(),
+    );
+  }
+
+  marca(prodotto: Prodotto): string {
+    return (
+      this.scheda(prodotto)?.marca ??
+      (/iphone/i.test(prodotto.nome)
+        ? 'Apple'
+        : /galaxy|samsung/i.test(prodotto.nome)
+          ? 'Samsung'
+          : /pixel/i.test(prodotto.nome)
+            ? 'Google'
+            : /oppo/i.test(prodotto.nome)
+              ? 'OPPO'
+              : /realme/i.test(prodotto.nome)
+                ? 'realme'
+                : /xiaomi|redmi|poco/i.test(prodotto.nome)
+                  ? 'Xiaomi'
+                  : 'Altri')
+    );
+  }
+
+  titolo(prodotto: Prodotto): string {
+    return prodotto.nome.replace(/^(Samsung|Apple|Google|OPPO|realme)\s+/i, '');
+  }
+
+  prezzoVerificato(prodotto: Prodotto): boolean {
+    return this.scheda(prodotto)?.prezzo === prodotto.prezzo;
+  }
+
+  get marche(): string[] {
+    return [...new Set(this.prodotti.map((p) => this.marca(p)))].sort((a, b) =>
+      a.localeCompare(b, 'it'),
+    );
+  }
+
+  contaMarca(marca: string): number {
+    return this.prodotti.filter((p) => this.marca(p) === marca).length;
+  }
+
+  get prodottiFiltrati(): Prodotto[] {
+    const parole = this.ricerca.toLocaleLowerCase('it').trim().split(/\s+/).filter(Boolean);
+    const prodotti = this.prodotti.filter((p) => {
+      const testo = (
+        p.nome +
+        ' ' +
+        this.marca(p) +
+        ' ' +
+        (this.scheda(p)?.memoria ?? '')
+      ).toLocaleLowerCase('it');
+      return (
+        parole.every((parola) => testo.includes(parola)) &&
+        (this.marcaSelezionata === 'Tutti' || this.marca(p) === this.marcaSelezionata) &&
+        (this.filtroDisponibilita === 'tutti' ||
+          (this.filtroDisponibilita === 'disponibili' ? p.disponibile : !p.disponibile))
+      );
+    });
+    return prodotti.sort((a, b) =>
+      this.ordinamento === 'prezzo-asc'
+        ? a.prezzo - b.prezzo
+        : this.ordinamento === 'prezzo-desc'
+          ? b.prezzo - a.prezzo
+          : this.ordinamento === 'nome'
+            ? a.nome.localeCompare(b.nome, 'it')
+            : this.confrontaProdotti(a, b),
+    );
+  }
+
+  get filtriAttivi(): boolean {
+    return (
+      !!this.ricerca || this.marcaSelezionata !== 'Tutti' || this.filtroDisponibilita !== 'tutti'
+    );
+  }
+  resetFiltri(): void {
+    this.ricerca = '';
+    this.marcaSelezionata = 'Tutti';
+    this.filtroDisponibilita = 'tutti';
+  }
+  apriNuovoProdotto(): void {
+    this.addDialog?.nativeElement.showModal();
+  }
+  chiudiNuovoProdotto(): void {
+    if (this.addDialog?.nativeElement.open) this.addDialog.nativeElement.close();
+  }
+  toggleGestione(prodotto: Prodotto): void {
+    this.gestioneId = this.gestioneId === prodotto.id ? null : prodotto.id;
+    this.pendingDeleteId = null;
+    this.annullaModifica();
+  }
   nuovoNome = '';
   nuovoPrezzo: number | null = null;
   nuovaQuantita: number | null = null;
@@ -106,17 +187,26 @@ export class AppComponent implements OnInit, OnDestroy {
   private fadeTimer: ReturnType<typeof setTimeout> | null = null;
   private clearTimer: ReturnType<typeof setTimeout> | null = null;
 
-
   get nuovoNomeValido(): boolean {
     return this.nuovoNome.trim().length > 0;
   }
 
   get nuovoPrezzoValido(): boolean {
-    return this.nuovoNomeValido && this.nuovoPrezzo !== null && Number(this.nuovoPrezzo) > 0;
+    return (
+      this.nuovoNomeValido &&
+      this.nuovoPrezzo !== null &&
+      Number.isFinite(Number(this.nuovoPrezzo)) &&
+      Number(this.nuovoPrezzo) > 0
+    );
   }
 
   get nuovaQuantitaValida(): boolean {
-    return this.nuovoPrezzoValido && this.nuovaQuantita !== null && Number.isFinite(Number(this.nuovaQuantita)) && Number(this.nuovaQuantita) >= 0;
+    return (
+      this.nuovoPrezzoValido &&
+      this.nuovaQuantita !== null &&
+      Number.isFinite(Number(this.nuovaQuantita)) &&
+      Number(this.nuovaQuantita) >= 0
+    );
   }
 
   get nuovaImmagineValida(): boolean {
@@ -148,7 +238,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
     this.http
       .get<Prodotto[]>(`${this.apiUrl}?select=*&order=created_at.asc`, {
-        headers: this.supabaseHeaders
+        headers: this.supabaseHeaders,
       })
       .subscribe({
         next: (prodotti) => {
@@ -162,13 +252,17 @@ export class AppComponent implements OnInit, OnDestroy {
           this.isLoading = false;
           this.errorMessage = 'Impossibile caricare i dispositivi da Supabase. Riprova tra poco.';
           this.cdr.detectChanges();
-        }
+        },
       });
   }
 
   aggiungiProdotto(): void {
+    if (this.isSaving) return;
     if (this.isProcessingImage) {
-      this.nuovoProdottoErrors = { ...this.creaErroriNuovoProdotto(), immagine: 'Attendi la preparazione dell\'immagine prima di salvare.' };
+      this.nuovoProdottoErrors = {
+        ...this.creaErroriNuovoProdotto(),
+        immagine: "Attendi la preparazione dell'immagine prima di salvare.",
+      };
       this.errorMessage = '';
       this.cdr.detectChanges();
       return;
@@ -191,22 +285,28 @@ export class AppComponent implements OnInit, OnDestroy {
       prezzo: this.nuovoPrezzo!,
       disponibile: quantita > 0,
       quantita,
-      immagine: this.nuovaImmaginePreview
+      immagine: this.nuovaImmaginePreview,
     };
 
     this.isSaving = true;
-    this.http.post<Prodotto[]>(this.apiUrl, nuovoProdotto, { headers: this.supabaseHeaders }).subscribe({
-      next: () => {
-        this.resetNuovoProdottoForm();
-        this.isSaving = false;
-        this.mostraSuccesso('Dispositivo aggiunto al catalogo.');
-        this.caricaDati();
-      },
-      error: () => {
-        this.isSaving = false;
-        this.mostraErrore('Non riesco ad aggiungere il dispositivo su Supabase. Riprova tra poco.');
-      }
-    });
+    this.http
+      .post<Prodotto[]>(this.apiUrl, nuovoProdotto, { headers: this.supabaseHeaders })
+      .subscribe({
+        next: () => {
+          this.resetNuovoProdottoForm();
+          this.chiudiNuovoProdotto();
+          this.resetFiltri();
+          this.isSaving = false;
+          this.mostraSuccesso('Dispositivo aggiunto al catalogo.');
+          this.caricaDati();
+        },
+        error: () => {
+          this.isSaving = false;
+          this.mostraErrore(
+            'Non riesco ad aggiungere il dispositivo su Supabase. Riprova tra poco.',
+          );
+        },
+      });
   }
 
   richiediEliminazione(id: string): void {
@@ -220,17 +320,22 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   eliminaProdotto(id: string): void {
-    if (!id) return;
+    if (!id || this.pendingIds.has(id)) return;
+    this.pendingIds.add(id);
 
     this.http
       .delete(`${this.apiUrl}?id=eq.${encodeURIComponent(id)}`, { headers: this.supabaseHeaders })
       .subscribe({
         next: () => {
+          this.pendingIds.delete(id);
           this.pendingDeleteId = null;
           this.mostraSuccesso('Dispositivo eliminato.');
           this.caricaDati();
         },
-        error: () => this.mostraErrore('Eliminazione non riuscita. Riprova tra poco.')
+        error: () => {
+          this.pendingIds.delete(id);
+          this.mostraErrore('Eliminazione non riuscita. Riprova tra poco.');
+        },
       });
   }
 
@@ -257,9 +362,9 @@ export class AppComponent implements OnInit, OnDestroy {
     if (this.editingId === null) return;
 
     const nome = this.editNome.trim();
-    const quantita = this.normalizzaQuantita(this.editQuantita);
+    const quantita = this.editDisponibile ? this.normalizzaQuantita(this.editQuantita) : 0;
 
-    if (!nome || !this.editPrezzo || this.editPrezzo <= 0) {
+    if (!nome || !Number.isFinite(this.editPrezzo) || !this.editPrezzo || this.editPrezzo <= 0) {
       this.mostraErrore('Completa correttamente i campi di modifica.');
       return;
     }
@@ -271,7 +376,10 @@ export class AppComponent implements OnInit, OnDestroy {
       prezzo: this.editPrezzo,
       disponibile: this.editDisponibile && quantita > 0,
       quantita,
-      immagine: prodottoCorrente?.immagine || this.trovaImmagine(nome)
+      immagine:
+        prodottoCorrente && prodottoCorrente.immagine === this.scheda(prodottoCorrente)?.immagine
+          ? this.scheda(prodottoCorrente)!.immagineFonte
+          : prodottoCorrente?.immagine || this.trovaImmagine(nome),
     };
 
     this.isSaving = true;
@@ -280,7 +388,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
     this.http
       .patch<Prodotto[]>(`${this.apiUrl}?id=eq.${encodeURIComponent(editingIdBackup)}`, payload, {
-        headers: this.supabaseHeaders
+        headers: this.supabaseHeaders,
       })
       .subscribe({
         next: () => {
@@ -294,7 +402,7 @@ export class AppComponent implements OnInit, OnDestroy {
           this.editingId = editingIdBackup;
           this.mostraErrore('Aggiornamento non riuscito. Riprova tra poco.');
           this.cdr.detectChanges();
-        }
+        },
       });
   }
 
@@ -319,12 +427,11 @@ export class AppComponent implements OnInit, OnDestroy {
       prodotto,
       {
         quantita,
-        disponibile: quantita > 0
+        disponibile: quantita > 0,
       },
-      'Quantità aggiornata.'
+      'Quantità aggiornata.',
     );
   }
-
 
   selezionaImmagine(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -343,7 +450,7 @@ export class AppComponent implements OnInit, OnDestroy {
     }
 
     if (file.size > 4 * 1024 * 1024) {
-      this.nuovoProdottoErrors.immagine = 'Seleziona un\'immagine più leggera di 4 MB.';
+      this.nuovoProdottoErrors.immagine = "Seleziona un'immagine più leggera di 4 MB.";
       this.errorMessage = '';
       input.value = '';
       return;
@@ -360,7 +467,8 @@ export class AppComponent implements OnInit, OnDestroy {
       })
       .catch(() => {
         this.isProcessingImage = false;
-        this.nuovoProdottoErrors.immagine = 'Non riesco a preparare questa immagine. Prova con un altro file.';
+        this.nuovoProdottoErrors.immagine =
+          'Non riesco a preparare questa immagine. Prova con un altro file.';
         this.errorMessage = '';
         this.cdr.detectChanges();
       });
@@ -385,13 +493,12 @@ export class AppComponent implements OnInit, OnDestroy {
     }
   }
 
-
   private creaErroriNuovoProdotto(): NuovoProdottoFormErrors {
     return {
       nome: '',
       prezzo: '',
       quantita: '',
-      immagine: ''
+      immagine: '',
     };
   }
 
@@ -472,8 +579,10 @@ export class AppComponent implements OnInit, OnDestroy {
   private aggiornaProdotto(
     prodotto: Prodotto,
     modifiche: Partial<Prodotto>,
-    messaggioSuccesso: string
+    messaggioSuccesso: string,
   ): void {
+    if (this.pendingIds.has(prodotto.id)) return;
+    this.pendingIds.add(prodotto.id);
     const backup: Prodotto = { ...prodotto };
     Object.assign(prodotto, modifiche);
     prodotto.quantita = this.normalizzaQuantita(prodotto.quantita);
@@ -485,23 +594,27 @@ export class AppComponent implements OnInit, OnDestroy {
         `${this.apiUrl}?id=eq.${encodeURIComponent(prodotto.id)}`,
         {
           disponibile: prodotto.disponibile,
-          quantita: prodotto.quantita
+          quantita: prodotto.quantita,
         },
-        { headers: this.supabaseHeaders }
+        { headers: this.supabaseHeaders },
       )
       .subscribe({
-        next: () => this.mostraSuccesso(messaggioSuccesso),
+        next: () => {
+          this.pendingIds.delete(prodotto.id);
+          this.mostraSuccesso(messaggioSuccesso);
+        },
         error: () => {
+          this.pendingIds.delete(prodotto.id);
           Object.assign(prodotto, backup);
           this.mostraErrore('Aggiornamento non riuscito. Riprova tra poco.');
           this.cdr.detectChanges();
-        }
+        },
       });
   }
 
   private confrontaProdotti(a: Prodotto, b: Prodotto): number {
-    const ordineA = ORDINE_PRODOTTI_INIZIALI[a.id] ?? Number.MAX_SAFE_INTEGER;
-    const ordineB = ORDINE_PRODOTTI_INIZIALI[b.id] ?? Number.MAX_SAFE_INTEGER;
+    const ordineA = this.scheda(a)?.ordine ?? Number.MAX_SAFE_INTEGER;
+    const ordineB = this.scheda(b)?.ordine ?? Number.MAX_SAFE_INTEGER;
 
     if (ordineA !== ordineB) {
       return ordineA - ordineB;
@@ -525,13 +638,17 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private normalizzaProdotto(prodotto: Prodotto): Prodotto {
     const quantita = this.normalizzaQuantita(prodotto.quantita ?? (prodotto.disponibile ? 3 : 0));
-    const immagineUfficiale = this.trovaImmagine(prodotto.nome);
+    const scheda = this.scheda(prodotto);
+    const immagine =
+      scheda && (prodotto.immagine === scheda.immagineFonte || !prodotto.immagine)
+        ? scheda.immagine
+        : prodotto.immagine;
 
     return {
       ...prodotto,
       quantita,
       disponibile: prodotto.disponibile && quantita > 0,
-      immagine: immagineUfficiale !== FALLBACK_IMAGE ? immagineUfficiale : prodotto.immagine || FALLBACK_IMAGE
+      immagine: immagine || FALLBACK_IMAGE,
     };
   }
 
@@ -541,12 +658,10 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   private trovaImmagine(nome: string): string {
-    const nomeNormalizzato = nome.toLowerCase().trim();
-    const chiave = Object.keys(IMMAGINI_PRODOTTO)
-      .sort((a, b) => b.length - a.length)
-      .find((prodotto) => nomeNormalizzato.includes(prodotto));
-
-    return chiave ? IMMAGINI_PRODOTTO[chiave] : FALLBACK_IMAGE;
+    return (
+      catalogoVerificato.find((p) => p.nome.toLowerCase() === nome.toLowerCase().trim())
+        ?.immagine ?? FALLBACK_IMAGE
+    );
   }
 
   private mostraErrore(message: string): void {
