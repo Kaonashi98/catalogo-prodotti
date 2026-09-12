@@ -7,7 +7,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "catalogo-prodotti": {
+    "devicehub": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -30,9 +30,7 @@
                 "input": "public"
               }
             ],
-            "styles": [
-              "src/styles.scss"
-            ]
+            "styles": ["src/styles.scss"]
           },
           "configurations": {
             "production": {
@@ -62,10 +60,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "catalogo-prodotti:build:production"
+              "buildTarget": "devicehub:build:production"
             },
             "development": {
-              "buildTarget": "catalogo-prodotti:build:development"
+              "buildTarget": "devicehub:build:development"
             }
           },
           "defaultConfiguration": "development"

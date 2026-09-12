@@ -937,6 +937,20 @@ h1 {
   }
 }
 
+.demo-note {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 0 18px;
+  padding: 12px 14px;
+  border: 1px solid #b7c7df;
+  border-radius: 10px;
+  background: #f4f7fc;
+  color: #415675;
+  font-size: 13px;
+}
+
 .source-group {
   margin-top: 18px;
   min-height: 74px;
@@ -1091,6 +1105,10 @@ h1 {
   }
 }
 @media (max-width: 700px) {
+  .demo-note {
+    align-items: flex-start;
+    flex-direction: column;
+  }
   .hero {
     grid-template-columns: 1fr;
   }

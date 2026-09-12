@@ -1,75 +1,89 @@
 # DeviceHub
 
-DeviceHub è una web app Angular per gestire un inventario digitale di dispositivi tech. Il progetto mostra un flusso CRUD completo con prodotti salvati online, immagini reali dei dispositivi, gestione delle quantità e interfaccia responsive.
+DeviceHub è una web app Angular per esplorare e gestire un inventario dimostrativo di smartphone. Mostra un flusso CRUD completo, filtri combinabili, immagini ottimizzate e prezzi accompagnati da fonti datate, senza permettere ai visitatori di alterare permanentemente il dataset condiviso.
 
-Demo online: [catalogo-prodotti.vercel.app](https://catalogo-prodotti.vercel.app/)
+[Demo online](https://catalogo-prodotti.vercel.app/) · [Fonti del catalogo](docs/catalogo-2026-09-08.md)
 
 ## Funzionalità
 
-- Selezione di 20 smartphone recenti di Apple, Samsung, Google, OPPO, realme e Xiaomi, aggiornata all'8 settembre 2026.
-- Prezzi reali per configurazione e colore, con data di verifica e link alla fonte su ogni scheda: [dettaglio delle fonti](docs/catalogo-2026-09-08.md).
-- Fotografie originali ottimizzate in WebP e incluse nell'app, con immagine neutra in caso di errore.
-- Ricerca per modello, marca e memoria, filtri combinabili e ordinamento per prezzo o nome.
-- Visualizzazione dei dispositivi con prezzo, immagine, quantità e stato di disponibilità.
-- Aggiunta di nuovi dispositivi tramite form controllato.
-- Caricamento immagine dal computer con anteprima e compressione prima del salvataggio.
-- Modifica di nome, prezzo, quantità e disponibilità.
-- Eliminazione con richiesta di conferma.
-- Aggiornamento rapido dello stato disponibile/esaurito.
-- Incremento e decremento delle quantità disponibili.
-- Messaggi di errore e successo direttamente nella pagina.
-- Dati salvati online tramite Supabase e API REST.
-- Layout responsive pubblicato su Vercel.
+- 20 smartphone di Apple, Samsung, Google, OPPO, realme e Xiaomi.
+- Ricerca per modello, marchio e memoria, filtro per disponibilità e ordinamento.
+- Creazione, modifica, eliminazione, quantità e disponibilità in una sandbox per scheda browser.
+- Ripristino immediato della sandbox ai dati originali caricati da Supabase.
+- Upload con validazione, limite di 4 MB, ridimensionamento e conversione WebP.
+- Stati di caricamento, feedback accessibili e fallback per errori di rete o immagini.
+- Layout responsive, navigabile da tastiera e pubblicato su Vercel.
 
-Quantità e disponibilità appartengono all'inventario dimostrativo: non sono le scorte dei negozi citati. I prezzi sono una rilevazione datata, non un aggiornamento automatico. Se un prezzo viene modificato nell'inventario, la scheda smette di presentarlo come verificato.
-
-Il logo e la favicon sono gli asset originali del progetto. La pubblicazione su Vercel segue il ramo `main` del repository collegato.
+Quantità e disponibilità sono dati dimostrativi, non scorte dei negozi citati. I prezzi sono una rilevazione dell'8 settembre 2026 e non si aggiornano automaticamente. Una scheda modificata non presenta più il prezzo come verificato.
 
 ## Stack
 
-- Angular 21
-- TypeScript
-- Angular Forms
-- HttpClient
-- Supabase
-- PostgreSQL
+- Angular 21 e TypeScript 5.9
+- Angular Forms e HttpClient
+- RxJS
+- Supabase/PostgreSQL
 - SCSS
-- Vercel
+- Vitest
+- GitHub Actions e Vercel
+
+## Architettura
+
+```text
+src/app/
+├── core/config/                  # configurazione infrastrutturale pubblica
+├── features/products/
+│   ├── models/                   # contratti TypeScript
+│   └── services/
+│       ├── product-api.service.ts       # lettura Supabase
+│       ├── demo-inventory.service.ts    # CRUD isolato in sessionStorage
+│       ├── product-catalog.service.ts   # normalizzazione e metadati
+│       └── product-image.service.ts     # validazione e compressione immagini
+├── app.ts                        # stato e coordinamento della vista
+└── app.html                      # interfaccia principale
+```
+
+La dimensione attuale non giustifica uno store globale o un backend applicativo aggiuntivo. I servizi separano I/O, dominio e immagini, mentre il componente principale coordina un'unica pagina.
+
+## Supabase e sicurezza della demo
+
+Supabase è la fonte in sola lettura del dataset iniziale. Le operazioni CRUD dell'interfaccia lavorano su una copia in `sessionStorage`: ogni scheda del browser è isolata, un refresh conserva la prova in corso e **Ripristina dati originali** ricrea la copia dal dataset Supabase.
+
+URL e publishable key sono centralizzati in `src/app/core/config/supabase.config.ts`. La publishable key deve essere disponibile al browser e quindi compare inevitabilmente nel bundle: non è un segreto e non sostituisce le policy Row Level Security. Service role key e altri segreti non devono mai essere inseriti nel frontend.
+
+Per rendere il database realmente non modificabile tramite chiamate REST dirette, applica in Supabase SQL Editor:
+
+```text
+supabase/migrations/20260912_read_only_portfolio_demo.sql
+```
+
+La migration abilita RLS, conserva le policy esistenti, aggiunge una policy `SELECT` dedicata e revoca ogni privilegio diverso dalla lettura ai ruoli pubblici. Verificala prima su un progetto di staging: non è stata applicata automaticamente da questo repository. Prima della migration, genera e conserva il rollback fedele ai grant correnti eseguendo `supabase/rollback/20260912_generate_exact_grants_rollback.sql`.
 
 ## Avvio locale
 
-Installa le dipendenze:
+Richiede Node.js 22 e npm 10.
 
 ```bash
 npm install
-```
-
-Avvia Angular:
-
-```bash
 npm start
 ```
 
-Apri il browser su:
+Apri `http://localhost:4200`.
 
-```text
-http://localhost:4200
-```
-
-## Backend
-
-Il progetto usa Supabase come backend online. La tabella `prodotti` espone le operazioni CRUD tramite API REST e Row Level Security configurata per l'accesso pubblico della demo.
-
-La chiave usata nel frontend è una chiave pubblicabile Supabase. Non è una chiave segreta e non concede privilegi amministrativi.
-
-## Script disponibili
+## Verifiche
 
 ```bash
-npm start
+npm test -- --watch=false
 npm run build
-npm test
 ```
 
-## Obiettivo del progetto
+I test coprono componente, filtri, normalizzazione, accesso Supabase in lettura, sandbox CRUD, ripristino e immagini. La workflow `.github/workflows/ci.yml` esegue `npm ci`, build e test a ogni push su `main` e pull request.
 
-Questo progetto è pensato come esercizio portfolio per mostrare gestione dello stato lato componente, comunicazione HTTP, operazioni CRUD, form controllati, aggiornamenti ottimistici, integrazione con un database online e cura dell'interfaccia utente.
+## Deployment
+
+La demo è distribuita con Vercel dal repository GitHub. Prima di considerare pubblicato un cambiamento occorre verificare il deploy e il bundle effettivamente servito; una build locale riuscita non dimostra da sola l'aggiornamento della demo.
+
+## Limiti dichiarati
+
+- La sandbox è intenzionalmente limitata alla singola scheda e non sincronizza modifiche tra visitatori.
+- Il frontend non amministra le policy Supabase; la migration RLS richiede applicazione manuale.
+- Non esistono autenticazione, ruoli applicativi o aggiornamento automatico dei prezzi.

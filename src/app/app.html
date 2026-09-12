@@ -129,6 +129,12 @@
       </button>
     </div>
     <div class="filter-panel">
+      <p class="demo-note" id="demo-sandbox-note">
+        Modalità demo: le modifiche restano soltanto in questa scheda del browser.
+        <button class="text-button" type="button" (click)="ripristinaDemo()" [disabled]="isLoading">
+          Ripristina dati originali
+        </button>
+      </p>
       <div class="search-row">
         <div class="search">
           <svg aria-hidden="true" viewBox="0 0 24 24">
@@ -390,7 +396,7 @@
                         min="0"
                         step="1"
                         [ngModel]="prodotto.quantita"
-                        (change)="aggiornaQuantita(prodotto, +$any($event.target).value)"
+                        (change)="aggiornaQuantitaDaInput(prodotto, $event)"
                         [disabled]="pendingIds.has(prodotto.id)"
                         [attr.aria-label]="'Quantità di ' + prodotto.nome"
                       /><button
@@ -470,6 +476,7 @@
   #addDialog
   class="add-dialog"
   aria-labelledby="add-product-title"
+  aria-describedby="demo-sandbox-note"
   (cancel)="isSaving && $event.preventDefault()"
 >
   <div class="dialog-header">
